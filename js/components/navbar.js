@@ -137,3 +137,9 @@ export default function navbar(navbar_id = 'navbar') {
 
     return _nav;
 }
+
+export function fullNavbar(navbarId = 'navbar') {
+    return navbar(navbarId)
+        .addLink(navLink('Home', 'index.html'))
+        .addLink(navLink('Cerca progetti', 'cerca.html'));
+}

@@ -1,11 +1,7 @@
-import navbar from "../components/navbar.js";
-import { navLink } from "../components/navbar.js";
-
+import { fullNavbar } from "../components/navbar.js";
 import { fetch_user_profile } from "../utils.js";
 
-const _navbar = navbar()
-    .addLink(navLink('Home', 'index.html'))
-    .addLink(navLink('Cerca progetti', 'cerca.html'));
+const _navbar = fullNavbar();
 
 const user_profile = fetch_user_profile()
     .then(resp => {
