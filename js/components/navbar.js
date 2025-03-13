@@ -1,4 +1,4 @@
-import { g } from "../utils.js";
+import { drop_jwt, g } from "../utils.js";
 
 function dropdownItem(text, link) {
     return g('li').appendAll(
@@ -38,6 +38,11 @@ function dropdown(title = "", id = "navbarDropdown") {
 
     _dropdown.addItem = (item) => {
         _list.appendChild(item);
+        return _dropdown;
+    }
+
+    _dropdown.addItems = (...items) => {
+        _list.append(...items)
         return _dropdown;
     }
 
@@ -110,6 +115,24 @@ export default function navbar(navbar_id = 'navbar') {
             }
         });
         return _nav;
+    }
+
+    _nav.loadRemoteContent = userData => {
+        if (!userData) return;
+        window.console.log(userData);
+        
+        let _logout = dropdownItem('Logout', 'index.html');
+        _logout.addEventListener('click', drop_jwt);
+
+        _dropdown
+            .setTitle(`Benvenuto ${userData.Nome} ${userData.Cognome[0]}.`)
+            .clear()
+            .addItems(
+                dropdownItem('Profilo', 'profilo.html'),
+                dropdownDivider(),
+                dropdownItem('Cambia account', 'login.html'),
+                _logout
+            );
     }
 
     return _nav;

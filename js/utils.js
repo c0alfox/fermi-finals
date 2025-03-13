@@ -32,7 +32,7 @@ async function api_fetch(request_method, endpoint, request_body, options) {
     let {new_jwt, ...json} = await resp.json();
     set_jwt(new_jwt ?? get_jwt());
 
-    return { status: resp.status, ok: resp.ok, data: json}
+    return { status: resp.status, ok: resp.ok, data: json };
 }
 
 async function fetch_user_profile() {
