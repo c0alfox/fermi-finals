@@ -18,19 +18,18 @@ function drop_jwt() {
 }
 
 async function api_fetch(request_method, endpoint, request_body, options) {
-    const jwt = get_jwt();
     const resp = await fetch(api_root + endpoint, {
         method: request_method,
         headers: {
-            'Authorization': `Bearer ${jwt}`,
+            'Authorization': `Bearer ${get_jwt()}`,
             ...(options?.headers ?? {})
         },
         body: JSON.stringify(request_body),
         ...options
     });
 
-    let {new_jwt, ...json} = await resp.json();
-    set_jwt(new_jwt ?? get_jwt());
+    let {jwt, ...json} = await resp.json();
+    set_jwt(jwt ?? get_jwt());
 
     return { status: resp.status, ok: resp.ok, data: json };
 }
@@ -64,13 +63,11 @@ async function fetch_user_data() {
  */
 
 /**
- * HTML Element builder
- * @param {keyof HTMLElementTagNameMap} element_name 
- * @returns {GeneratedElement & HTMLElement}
+ * Transform HTML Element to GeneratedElement
+ * @param {HTMLElement} elem 
+ * @returns {GeneratedElement}
  */
-function g(element_name) {
-    let elem = document.createElement(element_name);
-
+function t(elem) {
     elem.addClasses = (...tokens) => {
         elem.classList.add(...tokens);
         return elem;
@@ -106,4 +103,18 @@ function g(element_name) {
     return elem;
 }
 
-export { g, drop_jwt, api_fetch, fetch_user_profile, fetch_user_data }
+
+/**
+ * HTML Element builder
+ * @param {keyof HTMLElementTagNameMap} element_name 
+ * @param {...string} classes 
+ * @returns {GeneratedElement & HTMLElement}
+ */
+function g(element_name, ...classes) {
+    let elem = document.createElement(element_name);
+    elem.classList.add(...classes);
+
+    return t(elem);
+}
+
+export { g, t, drop_jwt, api_fetch, fetch_user_profile, fetch_user_data }
