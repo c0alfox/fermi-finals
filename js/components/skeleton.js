@@ -1,20 +1,26 @@
 /**
- * Build a skeleton for an element
- * @param {HTMLElement} elem 
- * @returns {HTMLElement}
+ * @template T
+ * @typedef Skeleton
+ * @prop { <D>(promise: Promise<D>, callback: (elem: T, data: D) => void) => Skeleton } onFulfilled
  */
-export default function skeleton(elem) {
+
+/**
+ * Build a skeleton
+ * @template {HTMLElement} T
+ * @param {T} elem 
+ * @returns {Skeleton<T>}
+ */
+export default function Skeleton(elem) {
     elem.classList.add('loading');
-    
-    /**
-     * 
-     * @param {Promise} promise 
-     * @returns 
-     */
-    elem.stopLoadingOnFulfilled = (promise) => {
+
+    elem.onFulfilled = (promise, callback) => {
+        promise.then(data => {
+            callback(elem, data);
+            elem.classList.remove('loading')
+        });
+
         return elem;
     }
 
-    elem.classList.remove()
     return elem;
 }

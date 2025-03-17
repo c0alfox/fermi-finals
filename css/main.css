@@ -1,0 +1,32 @@
+@keyframes LoadingBackgroundAnimation {
+    0% { background-position: 0% 0%; }
+    50% { background-position: 100% 0%; }
+    100% { background-position: 0% 0%; }
+}
+
+@-moz-keyframes LoadingBackgroundAnimation {
+    0% { background-position: 0% 0%; }
+    50% { background-position: 100% 0%; }
+    100% { background-position: 0% 0%; }
+}
+
+@-webkit-keyframes LoadingBackgroundAnimation {
+    0% { background-position: 0% 0%; }
+    50% { background-position: 100% 0%; }
+    100% { background-position: 0% 0%; }
+}
+
+.loading {
+    color: transparent;
+    background: rgb(192, 192, 192);
+    background: linear-gradient(120deg, rgba(192, 192, 192, 1) 40%, rgba(144, 144, 144, 1) 60%);
+    background-size: 200%;
+    animation: LoadingBackgroundAnimation 2s ease infinite both;
+    -moz-animation: LoadingBackgroundAnimation 2s ease infinite both;
+    -webkit-animation: LoadingBackgroundAnimation 2s ease infinite both;
+    border-radius: 4px;
+}
+
+.fit-content {
+    width: fit-content;
+}

@@ -1,5 +1,26 @@
 import { g } from "../utils.js";
 
+/**
+ * A Bootstrap modal wrapper providing simplified interface for popups
+ * @typedef {Object} Popup
+ * @property {(elem: HTMLElement, callback: Function, id?: string) => Popup} addAction - Adds action button to modal footer
+ * @property {(elem: HTMLElement) => Popup} removeAction - Removes an action button from modal footer
+ * @property {() => Popup} clearActions - Removes all action buttons
+ * @property {(title: string) => Popup} setTitle - Sets the modal title
+ * @property {(...elements: HTMLElement[]) => Popup} setBody - Adds elements to modal body
+ * @property {() => Popup} clearBody - Removes all content from modal body
+ * @property {() => Popup} show - Shows the modal
+ * @property {() => Popup} hide - Hides the modal
+ * @property {() => Popup} toggle - Toggles modal visibility
+ * @property {() => Popup} clear - Resets modal (clears title, body, and actions)
+ */
+
+
+/**
+ * Popup constructor
+ * @param {string} popup_id 
+ * @returns {Popup}
+ */
 export default function Popup(popup_id = 'default__popup') {
     let bootstrap_modal = null;
 
@@ -148,7 +169,16 @@ export default function Popup(popup_id = 'default__popup') {
     });
 }
 
+/**
+ * @typedef {Popup & {
+ *  setResponse: (response: {status: number, data: {message: string}}) => ErrorResponsePopup
+ * }} ErrorResponsePopup
+ */
 
+/**
+ * @param {string} [popup_id="error__popup"]
+ * @returns {ErrorResponsePopup}
+ */
 export function ErrorResponsePopup(popup_id = "error__popup") {
     Popup.call(this, popup_id);
 

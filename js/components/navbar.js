@@ -82,6 +82,13 @@ export default function navbar(navbar_id = 'navbar') {
                 g('div').addClasses('collapse', 'navbar-collapse')
                     .setId('navbarNav').appendAll(
                         _navLinks,
+                        /*
+                        g('form', 'd-flex', 'mx-auto', 'w-25')
+                            .appendAll(
+                                g('input', 'form-control', 'me-2'),
+                                g('button', 'btn', 'btn-outline-light').setText('Cerca')
+                            ),
+                        */
                         _dropdown
                     ),
                 g('button')
@@ -119,7 +126,6 @@ export default function navbar(navbar_id = 'navbar') {
 
     _nav.loadRemoteContent = userData => {
         if (!userData) return;
-        window.console.log(userData);
         
         let _logout = dropdownItem('Logout', 'index.html');
         _logout.addEventListener('click', drop_jwt);
