@@ -3,35 +3,35 @@
 /*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
 /*!40101 SET NAMES utf8mb4 */;
 
-CREATE TABLE IF NOT EXISTS PrgUtenti (
-    IDUtente INT PRIMARY KEY AUTO_INCREMENT,
-    Email VARCHAR(255) UNIQUE NOT NULL,
-    Password VARCHAR(255) NOT NULL,
-    Nome VARCHAR(255) NOT NULL,
-    Cognome VARCHAR(255) NOT NULL,
-    DataOraUtente DATETIME NOT NULL DEFAULT NOW(),
-    Bio TEXT
+CREATE TABLE IF NOT EXISTS PrgUsers (
+    user_id INT PRIMARY KEY AUTO_INCREMENT,
+    email VARCHAR(255) UNIQUE NOT NULL,
+    password VARCHAR(255) NOT NULL,
+    name VARCHAR(255) NOT NULL,
+    surname VARCHAR(255) NOT NULL,
+    user_datetime DATETIME NOT NULL DEFAULT NOW(),
+    bio TEXT
 ) ENGINE=InnoDB DEFAULT charset=utf8mb4;
 
-CREATE TABLE IF NOT EXISTS PrgNotifiche (
-    IDNotifica INT PRIMARY KEY AUTO_INCREMENT,
-    Titolo VARCHAR(255) NOT NULL,
-    Descrizione TEXT,
-    ActionLink VARCHAR(255),
-    IDUtente INT NOT NULL,
-    DataOraNotifica DATETIME NOT NULL DEFAULT NOW(),
-    FOREIGN KEY (IDUtente) REFERENCES PrgUtenti(IDUtente)
+CREATE TABLE IF NOT EXISTS PrgNotifications (
+    notification_id INT PRIMARY KEY AUTO_INCREMENT,
+    title VARCHAR(255) NOT NULL,
+    description TEXT,
+    action_link VARCHAR(255),
+    user_id INT NOT NULL,
+    notification_datetime DATETIME NOT NULL DEFAULT NOW(),
+    FOREIGN KEY (user_id) REFERENCES PrgUsers(user_id)
         ON UPDATE CASCADE
         ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT charset=utf8mb4;
 
-CREATE TABLE IF NOT EXISTS PrgProgetti (
-    IDProgetto INT PRIMARY KEY AUTO_INCREMENT,
-    Titolo VARCHAR(255) NOT NULL,
-    Abstract TEXT,
-    DataOraProgetto DATETIME NOT NULL DEFAULT NOW(),
-    IDUtente INT NOT NULL,
-    FOREIGN KEY (IDUtente) REFERENCES PrgUtenti(IDUtente)
+CREATE TABLE IF NOT EXISTS PrgProjects (
+    project_id INT PRIMARY KEY AUTO_INCREMENT,
+    title VARCHAR(255) NOT NULL,
+    abstract TEXT,
+    project_datetime DATETIME NOT NULL DEFAULT NOW(),
+    user_id INT NOT NULL,
+    FOREIGN KEY (user_id) REFERENCES PrgUsers(user_id)
         ON UPDATE CASCADE
         ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT charset=utf8mb4;
@@ -43,14 +43,14 @@ CREATE TABLE IF NOT EXISTS PrgProgetti (
 -- Valutare la revisione del progetto come membro interno
 -- Eliminare progetti
 
-CREATE TABLE IF NOT EXISTS PrgPermessi (
-    IDPermessi TINYINT UNSIGNED PRIMARY KEY,
-    NomePermessi VARCHAR(255) NOT NULL UNIQUE,
-    DescrizionePermessi TEXT
+CREATE TABLE IF NOT EXISTS PrgPermissions (
+    permissions_id TINYINT UNSIGNED PRIMARY KEY,
+    permissions_name VARCHAR(255) NOT NULL UNIQUE,
+    permissions_description TEXT
 ) ENGINE=InnoDB DEFAULT charset=utf8mb4;
 
-INSERT INTO PrgPermessi 
-    (IDPermessi, NomePermessi, DescrizionePermessi)
+INSERT INTO PrgPermissions 
+    (permissions_id, permissions_name, permissions_description)
 VALUES 
     (0b00000, "Nascosto", "Gli utenti con questi permessi non hanno alcun accesso alla revisione"),
     (0b00001, "Visualizzatore", "Gli utenti con questi permessi possono visualizzare la revisione"),
@@ -60,101 +60,104 @@ VALUES
     (0b01111, "Manutentore", "Gli utenti con questi permessi possono modificare e valutare la revisione secondo le caratteristiche valutate dal progetto"),
     (0b11111, "Admin", "Gli utenti con questi permessi possono effettuare qualsiasi operazione sulla revision, compresa l'eliminazione")
 ON DUPLICATE KEY UPDATE
-    NomePermessi = VALUES(NomePermessi),
-    DescrizionePermessi = VALUES(DescrizionePermessi);
+    permissions_name = VALUES(permissions_name),
+    permissions_description = VALUES(permissions_description);
 
-CREATE TABLE IF NOT EXISTS PrgRevisioni (
-    IDRevisione INT PRIMARY KEY AUTO_INCREMENT,
-    Numero INT NOT NULL,
-    Motivazioni TEXT,
-    DataOraRevisione DATETIME NOT NULL DEFAULT NOW(),
-    DataInizio DATE NOT NULL DEFAULT CURRENT_DATE(),
-    DataFine DATE,
-    IDProgetto INT NOT NULL,
-    IDPermessi TINYINT UNSIGNED NOT NULL DEFAULT 0b00001,
-    FOREIGN KEY (IDProgetto) REFERENCES PrgProgetti(IDProgetto)
+CREATE TABLE IF NOT EXISTS PrgRevisions (
+    revision_id INT PRIMARY KEY AUTO_INCREMENT,
+    revision_number INT NOT NULL,
+    motivations TEXT,
+    revision_datetime DATETIME NOT NULL DEFAULT NOW(),
+    start_date DATE NOT NULL DEFAULT CURRENT_DATE(),
+    end_date DATE,
+    project_id INT NOT NULL,
+    permissions_id TINYINT UNSIGNED NOT NULL DEFAULT 0b00001,
+    FOREIGN KEY (project_id) REFERENCES PrgProjects(project_id)
         ON UPDATE CASCADE
         ON DELETE CASCADE,
-    FOREIGN KEY (IDPermessi) REFERENCES PrgPermessi(IDPermessi)
+    FOREIGN KEY (permissions_id) REFERENCES PrgPermissions(permissions_id)
         ON UPDATE CASCADE
         ON DELETE RESTRICT
 ) ENGINE=InnoDB DEFAULT charset=utf8mb4;
 
-CREATE TABLE IF NOT EXISTS PrgCollaboratori (
-    IDUtente INT,
-    IDRevisione INT,
-    IDPermessi TINYINT UNSIGNED, 
-    FOREIGN KEY (IDUtente) REFERENCES PrgUtenti(IDUtente)
+CREATE TABLE IF NOT EXISTS PrgCollaborators (
+    user_id INT,
+    revision_id INT,
+    permissions_id TINYINT UNSIGNED, 
+    FOREIGN KEY (user_id) REFERENCES PrgUsers(user_id)
         ON UPDATE CASCADE
         ON DELETE CASCADE,
-    FOREIGN KEY (IDRevisione) REFERENCES PrgRevisioni(IDRevisione)
+    FOREIGN KEY (revision_id) REFERENCES PrgRevisions(revision_id)
         ON UPDATE CASCADE
         ON DELETE CASCADE,
-    FOREIGN KEY (IDPermessi) REFERENCES PrgPermessi(IDPermessi)
+    FOREIGN KEY (permissions_id) REFERENCES PrgPermissions(permissions_id)
         ON UPDATE CASCADE
         ON DELETE RESTRICT
 ) ENGINE=InnoDB DEFAULT charset=utf8mb4;
 
-CREATE TABLE IF NOT EXISTS PrgCategorie (
-    IDCategoria INT PRIMARY KEY AUTO_INCREMENT,
-    Nome VARCHAR(255) NOT NULL UNIQUE,
-    Descrizione TEXT,
-    IDProgetto INT NOT NULL,
-    FOREIGN KEY (IDProgetto) REFERENCES PrgProgetti(IDProgetto)
+CREATE TABLE IF NOT EXISTS PrgCategories (
+    category_id INT PRIMARY KEY AUTO_INCREMENT,
+    category_name VARCHAR(255) NOT NULL UNIQUE,
+    description TEXT,
+    project_id INT NOT NULL,
+    FOREIGN KEY (project_id) REFERENCES PrgProjects(project_id)
         ON UPDATE CASCADE
         ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT charset=utf8mb4;
 
-CREATE TABLE IF NOT EXISTS PrgFile (
-    IDFile INT PRIMARY KEY AUTO_INCREMENT,
-    NomeFile VARCHAR(255) NOT NULL,
-    DataOraFile DATETIME NOT NULL DEFAULT NOW(),
-    Descrizione Text,
-    IDRevisione INT NOT NULL,
-    FOREIGN KEY (IDRevisione) REFERENCES PrgRevisioni(IDRevisione)
+CREATE TABLE IF NOT EXISTS PrgFiles (
+    file_id INT PRIMARY KEY AUTO_INCREMENT,
+    file_name VARCHAR(255) NOT NULL,
+    file_datetime DATETIME NOT NULL DEFAULT NOW(),
+    file_description Text,
+    revision_id INT NOT NULL,
+    FOREIGN KEY (revision_id) REFERENCES PrgRevisions(revision_id)
         ON UPDATE CASCADE
         ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT charset=utf8mb4;
 
-CREATE TABLE IF NOT EXISTS PrgValutazioni (
-    IDValutazione INT PRIMARY KEY AUTO_INCREMENT,
-    DataOraValutazione DATETIME NOT NULL DEFAULT NOW(),
-    Voto INT CHECK (Voto BETWEEN 1 AND 5),
-    IDUtente INT,
-    IDCategoria INT NOT NULL,
-    IDRevisione INT NOT NULL,
-    FOREIGN KEY (IDUtente) REFERENCES PrgUtenti(IDUtente)
+CREATE TABLE IF NOT EXISTS PrgEvaluations (
+    evaluation_id INT PRIMARY KEY AUTO_INCREMENT,
+    evaluation_datetime DATETIME NOT NULL DEFAULT NOW(),
+    grade INT CHECK (grade BETWEEN 1 AND 5),
+    user_id INT,
+    category_id INT NOT NULL,
+    revision_id INT NOT NULL,
+    FOREIGN KEY (user_id) REFERENCES PrgUsers(user_id)
         ON UPDATE CASCADE
         ON DELETE SET NULL,
-    FOREIGN KEY (IDCategoria) references PrgCategorie(IDCategoria)
-        ON UPDATE CASCADE
-        ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT charset=utf8mb4;
-
-CREATE TABLE IF NOT EXISTS PrgProblemi (
-    IDProblema INT PRIMARY KEY AUTO_INCREMENT,
-    Titolo VARCHAR(255) NOT NULL,
-    Descrizione TEXT,
-    DataOraProblema DATETIME NOT NULL DEFAULT NOW(),
-    Aperto BOOLEAN NOT NULL DEFAULT 1,
-    IDRevisione INT NOT NULL,
-    FOREIGN KEY (IDRevisione) REFERENCES PrgRevisioni(IDRevisione)
-        ON UPDATE CASCADE
-        ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT charset=utf8mb4;
-
-CREATE TABLE IF NOT EXISTS PrgPost (
-    IDPost INT PRIMARY KEY AUTO_INCREMENT,
-    Titolo VARCHAR(255) NOT NULL,
-    Corpo TEXT,
-    DataOraPost DATETIME NOT NULL DEFAULT NOW(),
-    Allegato VARCHAR(255),
-    IDProblema INT NOT NULL,
-    IDUtente INT,
-    FOREIGN KEY (IDProblema) REFERENCES PrgProblemi(IDProblema)
+    FOREIGN KEY (category_id) references PrgCategories(category_id)
         ON UPDATE CASCADE
         ON DELETE CASCADE,
-    FOREIGN KEY (IDUtente) REFERENCES PrgUtenti(IDUtente)
+    FOREIGN KEY (revision_id) references PrgRevisions(revision_id)
+        ON UPDATE CASCADE
+        ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT charset=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS PrgIssues (
+    issue_id INT PRIMARY KEY AUTO_INCREMENT,
+    issue_title VARCHAR(255) NOT NULL,
+    issue_description TEXT,
+    issue_datetime DATETIME NOT NULL DEFAULT NOW(),
+    is_open BOOLEAN NOT NULL DEFAULT 1,
+    revision_id INT NOT NULL,
+    FOREIGN KEY (revision_id) REFERENCES PrgRevisions(revision_id)
+        ON UPDATE CASCADE
+        ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT charset=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS PrgPosts (
+    post_id INT PRIMARY KEY AUTO_INCREMENT,
+    post_title VARCHAR(255) NOT NULL,
+    body TEXT,
+    post_datetime DATETIME NOT NULL DEFAULT NOW(),
+    attachment VARCHAR(255),
+    issue_id INT NOT NULL,
+    user_id INT,
+    FOREIGN KEY (issue_id) REFERENCES PrgIssues(issue_id)
+        ON UPDATE CASCADE
+        ON DELETE CASCADE,
+    FOREIGN KEY (user_id) REFERENCES PrgUsers(user_id)
         ON UPDATE CASCADE
         ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT charset=utf8mb4;
