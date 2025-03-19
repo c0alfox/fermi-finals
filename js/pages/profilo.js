@@ -1,24 +1,12 @@
+import API from "../api/wrapper.js";
+import { g } from "../utils.js";
+
 import { fullNavbar } from "../components/navbar.js";
-import { fetch_user_profile, g } from "../utils.js";
 import Skeleton from "../components/skeleton.js";
 
 const _navbar = fullNavbar();
 
-/**
- * @type {Promise<{
- *   message: string,
- *   user_data: {
- *     Email: string,
- *     Nome: string,
- *     Cognome: string,
- *     DataOraUtente: string,
- *     Bio: string|null,
- *     NumProgetti: number
- *   },
- *   projects: Array<any>
- * }>}
- */
-const user_profile = fetch_user_profile()
+const user_profile = API.user_profile()
     .then(resp => {
         if (resp.ok) {
             _navbar.loadRemoteContent(resp.data.user_data)
@@ -37,7 +25,7 @@ window.addEventListener('load', ev => {
                 .onFulfilled(user_profile.then(data => data.user_data), (elem, data) => {
                     elem.setText(data.Nome, data.Cognome);
                 })
-        )
+        ),
     );
 });
 

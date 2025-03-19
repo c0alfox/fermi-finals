@@ -1,4 +1,3 @@
-const api_root = "http://localhost/TPSI/Progetto/api/v1/";
 const jwt_location = 'auth_jwt';
 
 function lorem() {
@@ -17,98 +16,83 @@ function drop_jwt() {
     window.sessionStorage.removeItem(jwt_location);
 }
 
-async function api_fetch(request_method, endpoint, request_body, options) {
-    const resp = await fetch(api_root + endpoint, {
-        method: request_method,
-        headers: {
-            'Authorization': `Bearer ${get_jwt()}`,
-            ...(options?.headers ?? {})
-        },
-        body: JSON.stringify(request_body),
-        ...options
-    });
-
-    let {jwt, ...json} = await resp.json();
-    set_jwt(jwt ?? get_jwt());
-
-    return { status: resp.status, ok: resp.ok, data: json };
-}
-
-async function fetch_user_profile() {
-    return await api_fetch('GET', 'account.php');
-}
-
-async function fetch_user_data() {
-    const resp = await fetch_user_profile();
-    return resp.data?.user_data ?? null;
-}
-
-/**
- * @typedef {Object} Generated
- * @prop {GFunction} addClasses
- * @prop {GFunction} removeClasses
- * @prop {GFunction} appendAll
- * @prop {GFunction} setId
- * @prop {GFunction} setAttributes
- * @prop {GFunction} setText
- */
-
-/**
- * @typedef {Generated & HTMLElement} GeneratedElement
- */
-
-/**
- * @callback GFunction
- * @returns {GeneratedElement}
- */
-
 /**
  * Transform HTML Element to GeneratedElement
- * @param {HTMLElement} elem 
- * @returns {GeneratedElement}
+ * @template {HTMLElement} T
+ * @param {T} elem 
  */
 function t(elem) {
-    elem.addClasses = (...tokens) => {
+    this = elem;
+
+    /**
+     * 
+     * @param  {...string} tokens 
+     * @returns {t<T>}
+     */
+    this.addClasses = (...tokens) => {
         elem.classList.add(...tokens);
         return elem;
     }
 
-    elem.removeClasses = (...tokens) => {
+    /**
+     * 
+     * @param  {...string} tokens 
+     * @returns {t<T>}
+     */
+    this.removeClasses = (...tokens) => {
         elem.removeClasses(...tokens);
         return elem;
     }
 
-    elem.appendAll = (...nodes) => {
+    /**
+     * 
+     * @param  {...HTMLElement} nodes
+     * @returns {t<T>}
+     */
+    this.appendAll = (...nodes) => {
         elem.append(...nodes);
         return elem;
     }
 
-    elem.setId = id => {
+    /**
+     * 
+     * @param {string} id 
+     * @returns {t<T>}
+     */
+    this.setId = id => {
         elem.id = id
         return elem;
     }
 
-    elem.setAttributes = attrs => {
+    /**
+     * 
+     * @param {Object} attrs 
+     * @returns {t<T>}
+     */
+    this.setAttributes = attrs => {
         for (const [key, val] of Object.entries(attrs)) {
             elem.setAttribute(key, val)
         }
         return elem;
     }
 
-    elem.setText = text => {
+    /**
+     * 
+     * @param {string} text 
+     * @returns {t<T>}
+     */
+    this.setText = text => {
         elem.innerText = text;
         return elem;
     }
-
-    return elem;
 }
 
 
 /**
  * HTML Element builder
  * @param {keyof HTMLElementTagNameMap} element_name 
- * @param {...string} classes 
- * @returns {GeneratedElement & HTMLElement}
+ * @param {...string} classes
+ * @returns {t<HTMLElement>}
  */
 function g(element_name, ...classes) {
     let elem = document.createElement(element_name);
@@ -117,4 +101,4 @@ function g(element_name, ...classes) {
     return t(elem);
 }
 
-export { g, t, drop_jwt, api_fetch, fetch_user_profile, fetch_user_data }
+export { g, t, get_jwt, set_jwt, drop_jwt }

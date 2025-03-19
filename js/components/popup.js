@@ -1,8 +1,9 @@
+import '../api/wrapper.js';
 import { g } from "../utils.js";
 
 /**
  * A Bootstrap modal wrapper providing simplified interface for popups
- * @typedef {Object} Popup
+ * @typedef Popup
  * @property {(elem: HTMLElement, callback: Function, id?: string) => Popup} addAction - Adds action button to modal footer
  * @property {(elem: HTMLElement) => Popup} removeAction - Removes an action button from modal footer
  * @property {() => Popup} clearActions - Removes all action buttons
@@ -18,8 +19,8 @@ import { g } from "../utils.js";
 
 /**
  * Popup constructor
- * @param {string} popup_id 
- * @returns {Popup}
+ * @param {string} [popup_id = "default__popup"]
+ * @returns {PopupType}
  */
 export default function Popup(popup_id = 'default__popup') {
     let bootstrap_modal = null;
@@ -170,18 +171,15 @@ export default function Popup(popup_id = 'default__popup') {
 }
 
 /**
- * @typedef {Popup & {
- *  setResponse: (response: {status: number, data: {message: string}}) => ErrorResponsePopup
- * }} ErrorResponsePopup
- */
-
-/**
+ * 
  * @param {string} [popup_id="error__popup"]
- * @returns {ErrorResponsePopup}
  */
 export function ErrorResponsePopup(popup_id = "error__popup") {
-    Popup.call(this, popup_id);
-
+    /**
+     * 
+     * @param {import('../api/wrapper.js').APIResponse} response
+     * @returns { ErrorResponsePopup }
+     */
     this.setResponse = (response) => {
         this.clear()
             .setTitle(`Errore ${response.status}`)
