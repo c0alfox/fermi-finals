@@ -40,8 +40,8 @@ function authentication_has_valid_user() {
 
         if (isset($jwt['payload']['user_id'])) {
             try {
-                $s = $pdo->prepare('SELECT IDUtente FROM PrgUtenti WHERE IDUtente = :id_utente');
-                $success = $s->execute(['id_utente' => $jwt['payload']['user_id']]);
+                $s = $pdo->prepare('SELECT 1 FROM PrgUsers WHERE user_id = :user_id');
+                $success = $s->execute(['user_id' => $jwt['payload']['user_id']]);
                 return $s->rowCount() > 0;
             } catch(PDOException $e) {
                 return false;
@@ -60,8 +60,8 @@ function authentication_get_user() {
 
     try {
         $jwt = authentication_get_jwt();
-        $s = $pdo->prepare('SELECT IDUtente FROM PrgUtenti WHERE IDUtente = :id_utente');
-        $success = $s->execute(['id_utente' => $jwt['payload']['user_id']]);
+        $s = $pdo->prepare('SELECT user_id FROM PrgUsers WHERE user_id = :user_id');
+        $success = $s->execute(['user_id' => $jwt['payload']['user_id']]);
 
         if ($s->rowCount()) {
             return $s->fetch(PDO::FETCH_ASSOC);

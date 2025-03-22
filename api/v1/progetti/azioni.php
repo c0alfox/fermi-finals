@@ -23,7 +23,7 @@ try {
 if ($_SERVER['REQUEST_METHOD'] == 'GET') {
     global $PERMISSION_READ;
 
-    if (!isset($_GET['id_progetto'])) {
+    if (!isset($_GET['project_id'])) {
         http_response_code(400);  # Bad Request
         die(json_encode(['message' => 'È richiesto un id di progetto']));
     }
@@ -34,13 +34,13 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET') {
     }
 
     try {
-        $s = $pdo->prepare('SELECT Nome, Cognome, Email, Titolo, Abstract, DataOraProgetto, COUNT(IDRevisione) AS NumRevisioni
-            FROM PrgProgetti 
-            JOIN PrgUtenti USING(IDUtente)
-            JOIN PrgRevisioni USING (IDProgetto)
-            WHERE IDProgetto = :id
-            GROUP BY Nome, Cognome, Email, Titolo, Abstract, DataOraProgetto');
-        $success = $s->execute(['id' => $_GET['id_progetto']]);
+        $s = $pdo->prepare('SELECT name, surname, email, title, abstract, project_datetime, COUNT(revision_id) AS revision_count
+            FROM PrgProjects 
+            JOIN PrgUsers USING(user_id)
+            JOIN PrgRevisions USING (project_id)
+            WHERE project_id = :id
+            GROUP BY name, surname, email, title, abstract, project_datetime');
+        $success = $s->execute(['id' => $_GET['project_id']]);
 
         if (!$s->rowCount()) {
             http_response_code(404);  # Not Found
@@ -49,10 +49,10 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET') {
         
         $proj_data = $s->fetch(PDO::FETCH_ASSOC);
 
-        $s = $pdo->prepare('SELECT Numero, DataOraRevisione, DataInizio, DataFine
-            FROM PrgRevisioni 
-            WHERE IDProgetto = :id AND (IDPermessi & 0b00001) != 0');
-        $success &= $s->execute(['id' => $_GET['id_progetto']]);
+        $s = $pdo->prepare('SELECT revision_number, revision_datetime, start_date, end_date
+            FROM PrgRevisions 
+            WHERE project_id = :id AND (permissions_id & 0b00001) != 0');
+        $success &= $s->execute(['id' => $_GET['project_id']]);
 
         if (!$success) {
             http_response_code(500);  # Internal Server Error
@@ -66,7 +66,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET') {
     }
 
     http_response_code(
-        $s->rowCount() == $proj_data['NumRevisioni']
+        $s->rowCount() == $proj_data['revision_count']
         ? 200  # OK
         : 206  # Partial Content
     );
@@ -95,7 +95,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         die(json_encode(['message' => 'Non hai i permessi per eseguire questa operazione']));
     }
 
-    if (!isset($data['titolo'])) {
+    if (!isset($data['title'])) {
         http_response_code(422);  # Unprocessable Content
         die(json_encode(['message' => 'È richiesto un titolo per il progetto']));
     }
@@ -106,16 +106,16 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
     try {
         $pdo->beginTransaction();
-        $s = $pdo->prepare("INSERT INTO PrgProgetti (Titolo, Abstract, IDUtente) 
+        $s = $pdo->prepare("INSERT INTO PrgProjects (title, abstract, user_id) 
             VALUES (:titolo, :abs, :id_utente);");
         $success = $s->execute([
-            'titolo' => $data['titolo'],
+            'titolo' => $data['title'],
             'abs' => $data['abstract'],
             'id_utente' => $user_id
         ]);
 
-        $s = $pdo->prepare("INSERT INTO PrgRevisioni (Numero, IDProgetto)
-            VALUES (1, (SELECT MAX(IDProgetto) AS MaxID FROM PrgProgetti));");
+        $s = $pdo->prepare("INSERT INTO PrgRevisions (revision_number, project_id)
+            VALUES (1, (SELECT MAX(IDProgetto) AS max_id FROM PrgProgetti));");
         $success &= $s->execute();
 
         if (!$success) {
@@ -144,12 +144,12 @@ if ($_SERVER['REQUEST_METHOD'] == 'PUT') {
         die(json_encode(['message' => 'Non hai i permessi per eseguire questa operazione']));
     }
 
-    if (!isset($data['id_progetto'])) {
+    if (!isset($data['project_id'])) {
         http_response_code(400);  # Bad Request
         die(json_encode(['message' => 'È richiesto un id di progetto']));
     }
 
-    if (!isset($data['titolo']) && !isset($data['abstract'])) {
+    if (!isset($data['title']) && !isset($data['abstract'])) {
         http_response_code(422);  # Unprocessable Content
         die(json_encode(['message' => 'Sono necessari dei campi da modificare']));
     }
@@ -157,22 +157,22 @@ if ($_SERVER['REQUEST_METHOD'] == 'PUT') {
     $items = [];
     $params = [];
 
-    if (isset($data['titolo'])) {
-        $items[] = 'Titolo = :titolo';
-        $params['titolo'] = $data['titolo'];
+    if (isset($data['title'])) {
+        $items[] = 'title = :title';
+        $params['title'] = $data['title'];
     }
 
     if (isset($data['abstract'])) {
-        $items[] = 'Abstract = :abstract';
+        $items[] = 'abstract = :abstract';
         $params['abstract'] = $data['abstract'];
     }
 
     $setClause = implode(', ', $items);
 
     try {
-        $sql = "UPDATE PrgProgetti SET $setClause WHERE IDProgetto = :id_progetto";
+        $sql = "UPDATE PrgProjects SET $setClause WHERE project_id = :project_id";
         $s = $pdo->prepare($sql);
-        $success = $s->execute(array_merge(['id_progetto' => $data['id_progetto']], $params));
+        $success = $s->execute(array_merge(['project_id' => $data['project_id']], $params));
 
         if (!$success) {
             http_response_code(500);  # Internal Server Error
@@ -206,8 +206,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'DELETE') {
     }
 
     try {
-        $s = $pdo->prepare('DELETE FROM PrgProgetti WHERE IDProgetto = :id');
-        $success = $s->execute(['id' => $data['id_progetto']]);
+        $s = $pdo->prepare('DELETE FROM PrgProjects WHERE project_id = :id');
+        $success = $s->execute(['id' => $data['project_id']]);
 
         if (!$success) {
             http_response_code(500);  # Internal Server Error

@@ -22,7 +22,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     }
 
     try {
-        $sql = "SELECT IDUtente, Password FROM PrgUtenti WHERE Email = :email";
+        $sql = "SELECT user_id, password FROM PrgUsers WHERE email = :email";
         $s = $pdo->prepare($sql);
         $success = $s->execute(['email' => $data['email']]);
     } catch(PDOException $e) {
@@ -36,7 +36,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     }
 
     $row = $s->fetch();
-    if (!password_verify($data['password'], $row['Password'])) {
+    if (!password_verify($data['password'], $row['password'])) {
         http_response_code(401);  # Unauthorized
         die(json_encode(['message' => 'Password errata']));
     }
@@ -62,7 +62,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         'message' => 'Login effettuato con successo', 
         'jwt' => jwt_create(
             ['exp' => $exp],
-            ['user_id' => $row['IDUtente'], 'permissions' => $permissions]
+            ['user_id' => $row['user_id'], 'permissions' => $permissions]
         ),
         'expiry' => $exp
     ]);

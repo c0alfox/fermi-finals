@@ -22,14 +22,16 @@ try {
 }
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-    if (!isset($data['password'])
-        || !isset($data['nome'])
-        || !isset($data['cognome'])
+    if (
+        !isset($data['password'])
+        || !isset($data['name'])
+        || !isset($data['surname'])
         || !isset($data['email'])
-        || !isset($data['password_confirm'])) {
-        
+        || !isset($data['password_confirm'])
+    ) {
+
         http_response_code(400);  # Bad Request
-        die(json_encode(['message' => 'Parametri richiesti mancanti']));
+        die(json_encode(['message' => 'Parametri richiesti mancanti', 'data' => $data]));
     }
 
     if (!is_valid_email($data['email'])) {
@@ -52,17 +54,17 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     }
 
     try {
-        $sql = "INSERT INTO PrgUtenti (Email, Nome, Cognome, Password, Bio)
-            VALUES (:email, :nome, :cognome, :password, :bio)";
+        $sql = "INSERT INTO PrgUsers (email, name, surname, password, bio)
+            VALUES (:email, :name, :surname, :password, :bio)";
         $s = $pdo->prepare($sql);
         $success = $s->execute([
             'email' => $data['email'],
-            'nome' => $data['nome'],
-            'cognome' => $data['cognome'],
+            'name' => $data['name'],
+            'surname' => $data['surname'],
             'password' => password_hash($data['password'], PASSWORD_DEFAULT),
             'bio' => $data['bio']
         ]);
-    } catch(PDOException $e) {
+    } catch (PDOException $e) {
         http_response_code(500);  # Internal Server Error
         die(json_encode(['message' => 'Utente non creato']));
     }
@@ -73,7 +75,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     }
 
     http_response_code(201);  # Created
-    echo(json_encode(['message' => 'Utente creato con successo']));
+    echo (json_encode(['message' => 'Utente creato con successo']));
     exit();
 }
 
@@ -94,9 +96,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET') {
     }
 
     try {
-        $s = $pdo->prepare('SELECT Email, Nome, Cognome, DataOraUtente, Bio
-            FROM PrgUtenti
-            WHERE IDUtente = :id');
+        $s = $pdo->prepare('SELECT email, name, surname, user_datetime, bio
+            FROM PrgUsers
+            WHERE user_id = :id');
         $success = $s->execute(['id' => $user_id]);
         $user_data = $s->fetch(PDO::FETCH_ASSOC);
 
@@ -105,22 +107,22 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET') {
             die(json_encode(['message' => 'Utente non trovato']));
         }
 
-        $s = $pdo->prepare('SELECT IDUtente, COUNT(IDProgetto) AS NumProgetti
-            FROM PrgUtenti
-            JOIN PrgProgetti USING(IDUtente)
-            WHERE IDUtente = :id
-            GROUP BY IDUtente');
+        $s = $pdo->prepare('SELECT user_id, COUNT(project_id) AS project_count
+            FROM PrgUsers
+            JOIN PrgProjects USING(user_id)
+            WHERE user_id = :id
+            GROUP BY user_id');
         $success &= $s->execute(['id' => $user_id]);
         $num_proj = $s->fetch(PDO::FETCH_ASSOC);
-        $num_proj = $num_proj == false 
-            ? ['IDUtente' => $user_id, 'NumProgetti' => 0]
+        $num_proj = $num_proj == false
+            ? ['user_id' => $user_id, 'project_count' => 0]
             : $num_proj;
 
-        $s = $pdo->prepare('SELECT IDProgetto, Titolo, Abstract, DataOraProgetto, COUNT(IDRevisione) AS NumRevisioni
-            FROM PrgProgetti 
-            JOIN PrgRevisioni USING (IDProgetto)
-            WHERE IDUtente = :id
-            GROUP BY IDProgetto, Titolo, Abstract, DataOraProgetto');
+        $s = $pdo->prepare('SELECT project_id, title, abstract, project_datetime, COUNT(revision_id) AS revision_count
+            FROM PrgProjects 
+            JOIN PrgRevisions USING (project_id)
+            WHERE user_id = :id
+            GROUP BY project_id, title, abstract, project_datetime');
         $success &= $s->execute(['id' => $user_id]);
 
         if (!$success) {
@@ -137,7 +139,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET') {
     http_response_code(200);  # OK
     echo (json_encode([
         'message' => 'Risultati della ricerca',
-        'user_data' => array_merge($user_data, ['NumProgetti' => $num_proj['NumProgetti']]),
+        'user_data' => array_merge($user_data, ['project_count' => $num_proj['project_count']]),
         'projects' => $projects,
         'jwt' => jwt_refresh(authentication_get_jwt())
     ]));
@@ -168,22 +170,22 @@ if ($_SERVER['REQUEST_METHOD'] == 'PUT') {
     $params = [];
 
     if (isset($data['password'])) {
-        $items[] = 'Password = :password';
+        $items[] = 'password = :password';
         $params['password'] = password_hash($data['password'], PASSWORD_DEFAULT);
     }
 
     if (isset($data['bio'])) {
-        $items[] = 'Bio = :bio';
+        $items[] = 'bio = :bio';
         $params['bio'] = $data['bio'];
     }
 
     $setClause = implode(', ', $items);
 
     try {
-        $sql = "UPDATE PrgUtenti SET $setClause WHERE IDUtente = :id_utente";
+        $sql = "UPDATE PrgUsers SET $setClause WHERE user_id = :user_id";
         $s = $pdo->prepare($sql);
-        $success = $s->execute(array_merge(['id_utente' => $user_id], $params));
-    } catch(PDOException $e) {
+        $success = $s->execute(array_merge(['user_id' => $user_id], $params));
+    } catch (PDOException $e) {
         http_response_code(500);  # Internal Server Error
         die(json_encode(['message' => 'Modifica fallita']));
     }
@@ -203,16 +205,16 @@ if ($_SERVER['REQUEST_METHOD'] == 'DELETE') {
     }
 
     try {
-        $sql = "DELETE FROM PrgUtenti WHERE IDUtente = :id_utente";
+        $sql = "DELETE FROM PrgUsers WHERE user_id = :id";
         $s = $pdo->prepare($sql);
-        $success = $s->execute(['id_utente' => $user_id]);
-    } catch(PDOException $e) {
+        $success = $s->execute(['id' => $user_id]);
+    } catch (PDOException $e) {
         http_response_code(500);  # Internal Server Error
         die(json_encode(['message' => 'Eliminazione fallita']));
     }
 
     http_response_code(200);  # OK
-    echo(json_encode(['message' => 'Utente eliminato con successo']));
+    echo (json_encode(['message' => 'Utente eliminato con successo']));
     exit();
 }
 
