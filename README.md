@@ -5,3 +5,4 @@ Gestore di progetti che permette di documentare e pubblicare progetti personali 
 # TO DO
 - [ ] dockerizzare il progetto per presentazione
 - [ ] studio di fattibilità
+- [ ] Funzione che ritorna la connessione al PDO per alleggerire gli script
