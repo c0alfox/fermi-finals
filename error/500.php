@@ -1,8 +1,7 @@
-<?php require_once $_SERVER['DOCUMENT_ROOT'] . '/utils/prelude.php'?>
 <!DOCTYPE html>
 <html lang="it">
 <head>
-    <?php include "$root/components/head.php" ?>
+    <?php include $_SERVER['DOCUMENT_ROOT'] . "/components/head.php" ?>
     <title>Errore 500</title>
 </head>
 <body class="d-flex align-items-center justify-content-center vh-100 bg-light">

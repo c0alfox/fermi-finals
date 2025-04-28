@@ -1,4 +1,4 @@
-<?php require_once $_SERVER['DOCUMENT_ROOT'] . '/utils/prelude.php'?>
+<?php require_once 'prelude.php'?>
 <!DOCTYPE html>
 <html lang="it">
 <head>

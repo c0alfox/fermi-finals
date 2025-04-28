@@ -43,7 +43,6 @@ function has_valid_user() {
 
     try {
         if (!has_token() || !has_valid_jwt()) {
-            var_dump(has_token(), has_valid_jwt());
             return false;
         }
 

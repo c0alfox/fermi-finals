@@ -1,6 +1,5 @@
 <?php
-require_once 'prelude_commons.php';
-require_once 'perms_constants.php';
+require_once $_SERVER['DOCUMENT_ROOT'] . '/utils/prelude_commons.php';
 
 function set_headers(string $allow_methods) {
     header('Access-Control-Allow-Origin: *');
