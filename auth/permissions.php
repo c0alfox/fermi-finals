@@ -1,7 +1,7 @@
 <?php
 namespace Perms;
 
-require_once $_SERVER['DOCUMENT_ROOT'] . '/utils/perms_constants.php';
+require_once 'prelude.php';
 
 function get_all() {
     return PERMISSION_READ

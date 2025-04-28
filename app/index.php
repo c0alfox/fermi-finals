@@ -6,5 +6,6 @@
     <title> Pagina Principale </title>
 </head>
 <body>
+    <?php include "$root/components/navbar.php"; navbar() ?>
 </body>
 </html>
