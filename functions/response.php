@@ -12,12 +12,12 @@ class Response {
         $this->data = $data;
     }
 
-    public function api_response() {
+    public function api_response($refresh_jwt = false) {
         http_response_code($this->response_code);
 
         $next_jwt = Auth\get_jwt();
 
-        if ($next_jwt === null) {
+        if (!$refresh_jwt || $next_jwt === null) {
             echo json_encode(array_merge($this->data, [
                 "message" => $this->message
             ]));

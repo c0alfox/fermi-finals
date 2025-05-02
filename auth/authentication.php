@@ -8,7 +8,7 @@ require_once 'permissions.php';
 
 const AUTH_COOKIE_NAME = 'auth_token';
 
-function set_token($token) {
+function set_token(string $token) {
     global $JWT_EXPIRY_TIME;
 
     setcookie(AUTH_COOKIE_NAME, $token, [
@@ -23,11 +23,16 @@ function has_token() {
 }
 
 function get_jwtstring(): string | null {
-    return $_COOKIE[AUTH_COOKIE_NAME];
+    return isset($_COOKIE[AUTH_COOKIE_NAME])
+        ? $_COOKIE[AUTH_COOKIE_NAME]
+        : null;
 }
 
 function get_jwt() {
-    return \JWT::from_string(get_jwtstring());
+    $jwtstring = get_jwtstring();
+    return $jwtstring === null
+        ? null
+        : \JWT::from_string($jwtstring);
 }
 
 function has_valid_jwt() {

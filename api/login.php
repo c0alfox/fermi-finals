@@ -1,5 +1,5 @@
 <?php
-require_once $_SERVER['DOCUMENT_ROOT'] . '/utils/prelude_api.php';
+require_once 'prelude.php';
 set_headers('POST');
 
 require_once "$root/utils/pdo.php";

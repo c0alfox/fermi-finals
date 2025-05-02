@@ -1,5 +1,5 @@
 <?php
-require_once $_SERVER['DOCUMENT_ROOT'] . '/utils/prelude_api.php';
+require_once 'prelude.php';
 set_headers('OPTIONS, HEAD, POST, GET, PUT, DELETE');
 
 if ($_SERVER['REQUEST_METHOD'] == 'OPTIONS') {
@@ -225,5 +225,4 @@ if ($_SERVER['REQUEST_METHOD'] == 'HEAD') {
     exit();
 }
 
-http_response_code(405);  # Unsupported method
-die(json_encode(['message' => 'Metodo non supportato']));
+UNSUPPORTED_METHOD->api_response();

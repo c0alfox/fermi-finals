@@ -1,3 +1,12 @@
+<?php
+require_once $_SERVER['DOCUMENT_ROOT'] . '/api/prelude.php';
+
+if (serve_json()) {
+    set_headers("GET");
+    (new Response(404, "Risorsa Inesistente"))->api_response();
+    exit();
+}
+?>
 <!DOCTYPE html>
 <html lang="it">
 <head>

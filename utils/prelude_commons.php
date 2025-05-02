@@ -7,3 +7,7 @@ function connect(): PDO {
     require_once 'pdo.php';
     return $pdo;
 }
+
+function serve_json(): bool {
+    return strtolower(getallheaders()['Content-Type']) === 'application/json';
+}
