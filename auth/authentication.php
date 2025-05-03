@@ -110,7 +110,7 @@ function get_permissions(): int {
     return $jwt->payload['permissions'];
 }
 
-function get_user_id() {
+function get_user_id(): null|int {
     if (!has_valid_jwt()) {
         return null;
     }

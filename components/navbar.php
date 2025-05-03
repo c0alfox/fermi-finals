@@ -41,4 +41,5 @@ function navbar() {
         </div>
     </div>
 </nav>
+<div style="height: 60px;"></div>
 <?php } ?>

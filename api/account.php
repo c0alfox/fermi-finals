@@ -7,11 +7,11 @@ if ($_SERVER['REQUEST_METHOD'] == 'OPTIONS') {
     exit();
 }
 
-require_once '../utils/pdo.php';
 require_once '../auth/jwt.php';
 require_once '../auth/authentication.php';
 require_once '../auth/permissions.php';
 require_once '../auth/validation.php';
+require_once "$root/functions/user.php";
 
 try {
     $data = json_decode(file_get_contents("php://input"), true);
@@ -95,41 +95,21 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET') {
     }
 
     try {
-        $s = $pdo->prepare('SELECT email, name, surname, user_datetime, bio
-            FROM PrgUsers
-            WHERE user_id = :id');
-        $success = $s->execute(['id' => $user_id]);
-        $user_data = $s->fetch(PDO::FETCH_ASSOC);
+        $user_data = User\fetch($user_id)
+            ->respond_if_error()
+            ->data;
 
-        if (!$s->rowCount()) {
-            http_response_code(404);  # Not Found
-            die(json_encode(['message' => 'Utente non trovato']));
-        }
+        $num_proj = User\project_count($user_id)
+            ->respond_if_error()
+            ->data;
 
-        $s = $pdo->prepare('SELECT user_id, COUNT(project_id) AS project_count
-            FROM PrgUsers
-            JOIN PrgProjects USING(user_id)
-            WHERE user_id = :id
-            GROUP BY user_id');
-        $success &= $s->execute(['id' => $user_id]);
-        $num_proj = $s->fetch(PDO::FETCH_ASSOC);
         $num_proj = $num_proj == false
             ? ['user_id' => $user_id, 'project_count' => 0]
             : $num_proj;
 
-        $s = $pdo->prepare('SELECT project_id, title, abstract, project_datetime, COUNT(revision_id) AS revision_count
-            FROM PrgProjects 
-            JOIN PrgRevisions USING (project_id)
-            WHERE user_id = :id
-            GROUP BY project_id, title, abstract, project_datetime');
-        $success &= $s->execute(['id' => $user_id]);
-
-        if (!$success) {
-            http_response_code(500);  # Internal Server Error
-            die(json_encode(['message' => 'Ricerca fallita']));
-        }
-
-        $projects = $s->fetchAll(PDO::FETCH_ASSOC);
+        $projects = User\projects($user_id)
+            ->respond_if_error()
+            ->data;
     } catch (PDOException $e) {
         http_response_code(500);  # Internal Server Error
         die(json_encode(['message' => 'Ricerca fallita']));

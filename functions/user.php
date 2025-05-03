@@ -41,6 +41,7 @@ function fetch($user_id) {
 
     return new Response(200, 'Ricerca avvenuta con successo', $data);
 }
+
 function get_userstring($user_id) {
     try {
         $pdo = connect();
@@ -98,7 +99,7 @@ function login($email, $password, int $permissions = 0b1): Response {
     ]);
 }
 
-function get_project_count($user_id, $suppose_user_exists = true) {
+function project_count($user_id, $suppose_user_exists = true) {
     try {
         $pdo = connect();
         $s = $pdo->prepare('SELECT user_id, COUNT(project_id) AS project_count
@@ -122,4 +123,29 @@ function get_project_count($user_id, $suppose_user_exists = true) {
     }
 
     return new Response(200, '', $num_proj);
+}
+
+function projects($user_id, $suppose_user_exists = true): Response {
+    try {
+        $pdo = connect();
+        $s = $pdo->prepare('SELECT project_id, title, abstract, project_datetime, COUNT(revision_id) AS revision_count
+            FROM PrgProjects 
+            JOIN PrgRevisions USING (project_id)
+            WHERE user_id = :id
+            GROUP BY project_id, title, abstract, project_datetime');
+        $s->execute(['id' => $user_id]);
+        $projects = $s->fetchAll(\PDO::FETCH_ASSOC);
+        $pdo = null;
+
+        if (!$s->rowCount()) {
+            if (!$suppose_user_exists && !exists($user_id)) {
+                return new Response(404, 'Utente non trovato');
+            }
+        }
+    } catch(\PDOException $e) {
+        return new Response(500, 'Errore nella ricerca');
+    }
+
+    return new Response(200, '', $projects);
+
 }

@@ -47,4 +47,21 @@ class Response {
             return $this;
         }
     }
+
+    public function die_if_error(bool $write_message = false): Response {
+        if ($this->is_ok()) {
+            return $this;
+        }
+
+        http_response_code($this->response_code);
+        if ($write_message) {
+            die($this->message);
+        } else {
+            die();
+        }
+    }
+
+    public function then(callable $f) {
+        return $f($this);
+    }
 }
