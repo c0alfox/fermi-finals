@@ -15,6 +15,7 @@ function set_token(string $token) {
         "expires" => time() + $JWT_EXPIRY_TIME,
         "httponly" => true,
         "secure" => true,
+        "path" => "/"
     ]);
 }
 
@@ -36,7 +37,7 @@ function get_jwt() {
 }
 
 function has_valid_jwt() {
-    if (!isset($_SERVER['HTTP_AUTHORIZATION']))
+    if (!isset($_COOKIE[AUTH_COOKIE_NAME]))
         return false;
 
     $jwtstring = get_jwtstring();

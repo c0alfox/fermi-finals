@@ -7,9 +7,7 @@ use Response;
 function exists($user_id): bool {
     try {
         $pdo = connect();
-        $s = $pdo->prepare("SELECT email, name, surname, user_datetime, bio
-            FROM PrgUsers
-            WHERE user_id = :id");
+        $s = $pdo->prepare("SELECT 1 FROM PrgUsers WHERE user_id = :id");
         $s->execute(['id' => $user_id]);
         $pdo = null;
 
@@ -42,6 +40,29 @@ function fetch($user_id) {
     }
 
     return new Response(200, 'Ricerca avvenuta con successo', $data);
+}
+function get_userstring($user_id) {
+    try {
+        $pdo = connect();
+        $s = $pdo->prepare("SELECT name, surname
+            FROM PrgUsers
+            WHERE user_id = :id");
+        $s->execute(['id' => $user_id]);
+        $data = $s->fetch(\PDO::FETCH_ASSOC);
+        $pdo = null;
+
+        if (!$s->rowCount()) {
+            return null;
+        }
+    } catch(\PDOException $e) {
+        return null;
+    }
+
+    $name = $data['name'];
+    $surn = $data['surname'];
+    $surn_initial = mb_substr($surn, 0, 1, "utf-8");
+
+    return "$name $surn_initial.";
 }
 
 function login($email, $password, int $permissions = 0b1): Response {
