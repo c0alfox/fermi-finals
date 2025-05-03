@@ -2,43 +2,12 @@
 require_once 'prelude.php';
 set_headers('POST');
 
-require_once "$root/utils/pdo.php";
-require_once "$root/auth/jwt.php";
-require_once "$root/auth/authentication.php";
-require_once "$root/auth/permissions.php";
-
-try {
-    $data = json_decode(file_get_contents("php://input"), true);
-} catch (Exception $e) {
-    http_response_code(400);  # Bad Request
-    die(json_encode(['message' => 'Corpo della richiesta malformato']));
-}
+require_once "$root/functions/user.php";
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-    if (!isset($data['email']) || !isset($data['password'])) {
-        http_response_code(422);  # Unprocessable Content
-        die(json_encode(['message' => 'Parametri richiesti mancanti']));
-    }
-
-    try {
-        $sql = "SELECT user_id, password FROM PrgUsers WHERE email = :email";
-        $s = $pdo->prepare($sql);
-        $success = $s->execute(['email' => $data['email']]);
-    } catch(PDOException $e) {
-        http_response_code(500);  # Internal Server Error
-        die(json_encode(['message' => 'Autenticazione fallita']));
-    }
-
-    if (!$s->rowCount()) {
-        http_response_code(404);  # Not Found
-        die(json_encode(['message' => 'Utente inesistente']));
-    }
-
-    $row = $s->fetch();
-    if (!password_verify($data['password'], $row['password'])) {
-        http_response_code(401);  # Unauthorized
-        die(json_encode(['message' => 'Password errata']));
-    }
+    $data = get_json_contents(['email', 'password'])
+        ->respond_if_error()
+        ->data;
 
     if (!isset($data['permissions'])) {
         $data['permissions'] = 0b1;
@@ -50,27 +19,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         die(json_encode(['message' => "I permessi devono essere un numero compreso tra 0 e $pmax"]));
     }
 
-    $permissions = $data['permissions'];
-    $permissions = max(0, $permissions);
-    $permissions &= Perms\get_all();
-
-    http_response_code(200);  # OK
-    global $JWT_EXPIRY_TIME;
-    $exp = time() + $JWT_EXPIRY_TIME;
-
-    $jwt = new Jwt(
-        ['exp' => $exp],
-        ['user_id' => $row['user_id'], 'permissions' => $permissions]
-    );
-    $jwt->set_cookie();
-
-    echo json_encode([
-        'message' => 'Login effettuato con successo', 
-        'expiry' => $exp,
-        'jwt' => $jwt->to_string(),
-    ]);
-    exit();
+    User\login($data['email'], $data['password'], $data['permissions'])
+        ->respond_if_error()
+        ->api_response();
 } 
 
-http_response_code(405);  # Unsupported method
-die(json_encode(['message' => 'Metodo non supportato']));
+UNSUPPORTED_METHOD->api_response();

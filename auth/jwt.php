@@ -23,7 +23,13 @@ class JWT {
     public $header;
     public $payload;
 
-    public function __construct(array $header, array $payload) {
+    public function __construct(array $header, array $payload, bool $auto_expiry = false) {
+        if ($auto_expiry) {
+            global $JWT_EXPIRY_TIME;
+            $expiry = time() + $JWT_EXPIRY_TIME;
+            $header = array_merge($header, ['exp' => $expiry]);
+        }
+
         $this->header = array_merge([
             'typ' => 'JWT',
             'alg' => 'HS256',
@@ -136,5 +142,9 @@ class JWT {
             array_merge($this->header, ['exp' => time() + $expiry_time]),
             $this->payload
         );
+    }
+
+    public function get_expiry() {
+        return $this->header['exp'];
     }
 }

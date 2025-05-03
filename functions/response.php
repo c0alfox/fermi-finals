@@ -4,7 +4,7 @@ require_once $_SERVER['DOCUMENT_ROOT'] . '/auth/authentication.php';
 class Response {
     public int $response_code;
     public string $message;
-    public array $data;
+    public $data;
 
     public function __construct(int $response_code, string $message, $data = []) {
         $this->response_code = $response_code;
@@ -24,10 +24,23 @@ class Response {
         } else {
             echo json_encode(array_merge($this->data, [
                 "message" => $this->message,
-                "jwt" => $next_jwt->refresh()
+                "jwt" => $next_jwt->refresh()->to_string()
             ]));
         }
 
         exit();
+    }
+
+    public function is_error() {
+        return $this->response_code >= 300;
+    }
+
+    public function respond_if_error($refresh_jwt = false): Response {
+        if ($this->is_error()) {
+            $this->api_response($refresh_jwt);
+            exit();
+        } else {
+            return $this;
+        }
     }
 }

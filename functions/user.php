@@ -1,20 +1,38 @@
 <?php
 namespace User;
 
+require_once 'prelude.php';
 use Response;
 
-require_once 'api/utils/pdo.php';
-require_once 'response.php';
+function exists($user_id): bool {
+    try {
+        $pdo = connect();
+        $s = $pdo->prepare("SELECT email, name, surname, user_datetime, bio
+            FROM PrgUsers
+            WHERE user_id = :id");
+        $s->execute(['id' => $user_id]);
+        $pdo = null;
+
+        if (!$s->rowCount()) {
+            return false;
+        }
+    } catch(\PDOException $e) {
+        echo "Errore nella ricerca";
+        return false;
+    }
+
+    return true;
+}
 
 function fetch($user_id) {
-    global $pdo;
-
     try {
+        $pdo = connect();
         $s = $pdo->prepare("SELECT email, name, surname, user_datetime, bio
             FROM PrgUsers
             WHERE user_id = :id");
         $s->execute(['id' => $user_id]);
         $data = $s->fetch(\PDO::FETCH_ASSOC);
+        $pdo = null;
 
         if (!$s->rowCount()) {
             return new Response(404, 'Utente non trovato');
@@ -24,4 +42,63 @@ function fetch($user_id) {
     }
 
     return new Response(200, 'Ricerca avvenuta con successo', $data);
+}
+
+function login($email, $password, int $permissions = 0b1): Response {
+    try {
+        $pdo = connect();
+        $s = $pdo->prepare("SELECT user_id, password FROM PrgUsers WHERE email = :email");
+        $s->execute(['email' => $email]);
+        $user_row = $s->fetch(\PDO::FETCH_ASSOC);
+    } catch(\PDOException $e) {
+        return new Response(500, 'Autenticazione Fallita');
+    }
+
+    if (!$s->rowCount()) {
+        return new Response(404, 'Utente inesistente');
+    }
+
+    if (!password_verify($password, $user_row['password'])) {
+        return new Response(401, 'Password errata');
+    }
+
+    $permissions = max(0, $permissions);
+    $permissions &= \Perms\get_all();
+    
+    $jwt = new \Jwt([],
+        ['user_id' => $user_row['user_id'], 'permissions' => $permissions],
+        true
+    );
+    $jwt->set_cookie();
+
+    return new Response(200, 'Login effettuato con successo', [
+        'expiry' => $jwt->get_expiry(),
+        'jwt' => $jwt->to_string()
+    ]);
+}
+
+function get_project_count($user_id, $suppose_user_exists = true) {
+    try {
+        $pdo = connect();
+        $s = $pdo->prepare('SELECT user_id, COUNT(project_id) AS project_count
+            FROM PrgUsers
+            JOIN PrgProjects USING(user_id)
+            WHERE user_id = :id
+            GROUP BY user_id');
+        $s->execute(['id' => $user_id]);
+        $num_proj = $s->fetch(\PDO::FETCH_ASSOC);
+        $pdo = null;
+
+        if (!$s->rowCount()) {
+            if (!$suppose_user_exists && !exists($user_id)) {
+                return new Response(404, 'Utente non trovato');
+            }
+
+            return new Response(200, '', 0);
+        }
+    } catch(\PDOException $e) {
+        return new Response(500, 'Errore nella ricerca');
+    }
+
+    return new Response(200, '', $num_proj);
 }

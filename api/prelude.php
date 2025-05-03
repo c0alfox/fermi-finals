@@ -2,6 +2,8 @@
 require_once $_SERVER['DOCUMENT_ROOT'] . '/utils/prelude_commons.php';
 
 require_once "$root/functions/response.php";
+require_once "$root/functions/json.php";
+
 const UNSUPPORTED_METHOD = new Response(405, "La risosrsa richiesta non consente il metodo selezionato");
 
 function set_headers(string $allow_methods) {
