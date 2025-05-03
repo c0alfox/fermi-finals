@@ -19,6 +19,13 @@ function set_token(string $token) {
     ]);
 }
 
+function unset_token() {
+    setcookie(AUTH_COOKIE_NAME, "", [
+        "expires" => time() - 3600,
+        "path" => "/"
+    ]);
+}
+
 function has_token() {
     return isset($_COOKIE[AUTH_COOKIE_NAME]);
 }
