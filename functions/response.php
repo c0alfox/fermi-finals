@@ -35,6 +35,10 @@ class Response {
         return $this->response_code >= 300;
     }
 
+    public function is_ok() {
+        return !$this->is_error();
+    }
+
     public function respond_if_error($refresh_jwt = false): Response {
         if ($this->is_error()) {
             $this->api_response($refresh_jwt);

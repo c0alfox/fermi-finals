@@ -16,3 +16,13 @@ function get_json_contents(array $required_params): Response {
 
     return new Response(200, "", $data);
 }
+
+function has_required_parameters(array $source, array $required): bool {
+    foreach ($required as $param) {
+        if (!isset($source[$param])) {
+            return false;
+        }
+    }
+
+    return true;
+}
