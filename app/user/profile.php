@@ -40,13 +40,13 @@ $projs = User\projects($user_id)->data;
         </div>
         <h2> Biografia </h2>
         <?php if (empty($user['bio'])): ?>
-            <p class="mx-5 muted small"> <i> Nessuna biografia inserita </i> </p>
+            <p class="mx-5 muted italic" id="bio" data-empty> </p>
         <?php else: ?>
-            <p class="mx-5"> <?= htmlspecialchars($user['bio']) ?> </p>
+            <p class="mx-5" id="bio"> <?= htmlspecialchars($user['bio']) ?> </p>
         <?php endif; ?>
         <?php if ($p_count == 0): ?>
             <h2> Progetti </h2>
-            <p class="mx-5 muted small"> <i> Nessun progetto caricato </i> </p>
+            <p class="mx-5 muted italic"> Nessun progetto caricato </p>
         <?php else: ?>
             <h2> Progetti ( <?= $p_count ?> ) </h2>
             <div class="mx-5">
@@ -70,5 +70,9 @@ $projs = User\projects($user_id)->data;
             </div>
         <?php endif; ?>
     </main>
+
+    <?php if ($is_self): ?>
+    <script src="/static/js/pages/profile.js" type="module"></script>
+    <?php endif; ?>
 </body>
 </html>
