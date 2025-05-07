@@ -34,6 +34,16 @@
     position: relative;
 }
 
+.btn-add::before {
+    content: '+';
+    display: inline;
+    font-weight: bold;
+    padding-right: 0.5em;
+    left: 2px;
+    top: 50%;
+    transform: translateY(-50%);
+}
+
 .matita,
 .editable::after {
     aspect-ratio: 1 / 1;

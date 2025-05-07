@@ -10,7 +10,12 @@ $is_self = true;
 if (isset($_GET['id']) && is_numeric($_GET['id'])) {
 	$user_id = $_GET['id'];
     $is_self = false;
+} elseif ($user_id === null) {
+    header('Location: /app/auth/login.php');
+    die();
 }
+
+Auth\refresh_token();
 
 $user = User\fetch($user_id)
     ->die_if_error()
@@ -40,11 +45,15 @@ $projs = User\projects($user_id)->data;
         <?php else: ?>
             <p class="mx-5" id="bio"> <?= htmlspecialchars($user['bio']) ?> </p>
         <?php endif; ?>
+        
+        <div class="clearfix">
+            <h2 class="float-start"> Progetti <?= $p_count == 0 ? "": "($p_count)" ?> </h2>
+            <a href="/app/project/create.php" class="btn btn-primary btn-add float-end">Aggiungi un nuovo progetto</a>
+        </div>
+
         <?php if ($p_count == 0): ?>
-            <h2> Progetti </h2>
             <p class="mx-5 muted italic"> Nessun progetto caricato </p>
         <?php else: ?>
-            <h2> Progetti ( <?= $p_count ?> ) </h2>
             <div class="mx-5">
                 <?php foreach ($projs as $p): ?>
                 <div class="card mt-3">
@@ -59,7 +68,7 @@ $projs = User\projects($user_id)->data;
                         <p class="card-text"> <?= htmlspecialchars($p['abstract']) ?> </p>
                     </div>
                     <div class="card-footer">
-                        <a href="#" class="btn btn-primary float-end">Vai</a>
+                        <a href="/app/project/details.php?id=<?= $p['project_id'] ?>" class="btn btn-primary float-end">Vai</a>
                     </div>
                 </div>
                 <?php endforeach; ?>

@@ -11,6 +11,7 @@ const AUTH_COOKIE_NAME = 'auth_token';
 function set_token(string $token) {
     global $JWT_EXPIRY_TIME;
 
+    $_COOKIE[AUTH_COOKIE_NAME] = $token;
     setcookie(AUTH_COOKIE_NAME, $token, [
         "expires" => time() + $JWT_EXPIRY_TIME,
         "httponly" => true,
@@ -28,6 +29,16 @@ function unset_token() {
 
 function has_token() {
     return isset($_COOKIE[AUTH_COOKIE_NAME]);
+}
+
+function refresh_token(): bool {
+    $jwt = get_jwt();
+    if ($jwt === null) {
+        return false;
+    } else {
+        set_token($jwt->refresh()->to_string());
+        return true;
+    }
 }
 
 function get_jwtstring(): string | null {
