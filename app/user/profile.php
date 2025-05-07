@@ -12,10 +12,6 @@ if (isset($_GET['id']) && is_numeric($_GET['id'])) {
     $is_self = false;
 }
 
-if ($is_self) {
-    die();
-}
-
 $user = User\fetch($user_id)
     ->die_if_error()
     ->data;
@@ -40,7 +36,7 @@ $projs = User\projects($user_id)->data;
         </div>
         <h2> Biografia </h2>
         <?php if (empty($user['bio'])): ?>
-            <p class="mx-5 muted italic" id="bio" data-empty> </p>
+            <p class="mx-5 muted italic" id="bio" data-empty> Nessuna biografia inserita </p>
         <?php else: ?>
             <p class="mx-5" id="bio"> <?= htmlspecialchars($user['bio']) ?> </p>
         <?php endif; ?>
@@ -60,7 +56,7 @@ $projs = User\projects($user_id)->data;
                             <p class="float-start">Totale revisioni: <?= $p['revision_count'] ?> </p>
                             <p class="float-end">Creato il: <?= date('d/m/Y H:i:s', strtotime($p['project_datetime']))?> </p>
                         </div>
-                        <p class="card-text"> <?= $p['abstract'] ?> </p>
+                        <p class="card-text"> <?= htmlspecialchars($p['abstract']) ?> </p>
                     </div>
                     <div class="card-footer">
                         <a href="#" class="btn btn-primary float-end">Vai</a>
