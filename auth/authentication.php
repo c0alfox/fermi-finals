@@ -63,9 +63,8 @@ function has_valid_jwt() {
 }
 
 function has_valid_user() {
-    global $pdo;
-
     try {
+        $pdo = connect();
         if (!has_token() || !has_valid_jwt()) {
             return false;
         }
@@ -94,9 +93,8 @@ function has_valid_user() {
 }
 
 function get_user() {
-    global $pdo;
-
     try {
+        $pdo = connect();
         $jwt = get_jwt();
         $s = $pdo->prepare('SELECT user_id FROM PrgUsers WHERE user_id = :user_id');
         $s->execute(['user_id' => $jwt->payload['user_id']]);

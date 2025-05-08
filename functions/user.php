@@ -108,7 +108,7 @@ function project_count($user_id, $suppose_user_exists = true) {
             WHERE user_id = :id
             GROUP BY user_id');
         $s->execute(['id' => $user_id]);
-        $num_proj = $s->fetch(\PDO::FETCH_ASSOC);
+        $num_proj = $s->fetchColumn(1);
         $pdo = null;
 
         if (!$s->rowCount()) {

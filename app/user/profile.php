@@ -48,7 +48,9 @@ $projs = User\projects($user_id)->data;
         
         <div class="clearfix">
             <h2 class="float-start"> Progetti <?= $p_count == 0 ? "": "($p_count)" ?> </h2>
+            <?php if ($is_self): ?>
             <a href="/app/project/create.php" class="btn btn-primary btn-add float-end">Aggiungi un nuovo progetto</a>
+            <?php endif; ?>
         </div>
 
         <?php if ($p_count == 0): ?>
@@ -65,7 +67,11 @@ $projs = User\projects($user_id)->data;
                             <p class="float-start">Totale revisioni: <?= $p['revision_count'] ?> </p>
                             <p class="float-end">Creato il: <?= date('d/m/Y H:i:s', strtotime($p['project_datetime']))?> </p>
                         </div>
-                        <p class="card-text"> <?= htmlspecialchars($p['abstract']) ?> </p>
+                        <?php if ($p['abstract'] === null): ?>
+                            <p class="card-text italic"> Il progetto non ha abstract </p>
+                        <?php else: ?>
+                            <p class="card-text"> <?= htmlspecialchars($p['abstract']) ?> </p>
+                        <?php endif; ?>
                     </div>
                     <div class="card-footer">
                         <a href="/app/project/details.php?id=<?= $p['project_id'] ?>" class="btn btn-primary float-end">Vai</a>

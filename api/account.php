@@ -1,11 +1,7 @@
 <?php
 require_once 'prelude.php';
 set_headers('OPTIONS, HEAD, POST, GET, PUT, DELETE');
-
-if ($_SERVER['REQUEST_METHOD'] == 'OPTIONS') {
-    http_response_code(204);  # No Content
-    exit();
-}
+handle_options_method();
 
 require_once '../auth/jwt.php';
 require_once '../auth/authentication.php';
