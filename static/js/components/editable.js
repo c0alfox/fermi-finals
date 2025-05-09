@@ -22,9 +22,9 @@ export default class Editable {
      * @private
      */
     #callbacks = {
-        submit: () => {},
-        beginEdit: () => {},
-        endEdit: () => {}
+        submit: async () => {},
+        beginEdit: async () => {},
+        endEdit: async () => {}
     };
 
     /**
@@ -62,24 +62,24 @@ export default class Editable {
      * Adds event listeners to handle blur submission.
      */
     #addEventListeners() {
-        this.element.addEventListener('blur', () => {
-            this.#callbacks.endEdit(this);
+        this.element.addEventListener('blur', async () => {
+            await this.#callbacks.endEdit(this);
             if (this.gaugeEmpty(this.element)) {
                 this.setEmpty(true);
             }
-            this.#callbacks.submit(this);
+            await this.#callbacks.submit(this);
         });
 
-        this.element.addEventListener('focus', () => {
+        this.element.addEventListener('focus', async () => {
             this.#prepareForInput();
-            this.#callbacks.beginEdit(this);
+            await this.#callbacks.beginEdit(this);
         });
     }
 
     /**
      * Registers a callback to be invoked when the element loses focus.
      * @param {("submit"|"beginEdit"|"endEdit")} eventType - Function to call on submission.
-     * @param {(elem: Editable) => void} callback - Function to call on submission.
+     * @param {async (elem: Editable) => void} callback - Function to call on submission.
      */
     on(eventType, callback) {
         switch (eventType) {
@@ -117,6 +117,19 @@ export default class Editable {
         } else {
             this.element.removeAttribute(EMPTY_EDITABLE_ATTRIBUTE);
             this.element.classList.remove('italic');
+        }
+    }
+
+    valid() {
+        this.lastValidValue = !this.empty 
+            ? this.element.innerText
+            : "";
+    }
+
+    reset() {
+        this.element.innerHTML = this.lastValidValue;
+        if (this.gaugeEmpty(this.element)) {
+            this.setEmpty(true);
         }
     }
 

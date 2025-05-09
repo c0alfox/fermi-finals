@@ -29,3 +29,9 @@ function handle_options_method() {
         exit();
     }
 }
+
+function optional($val) {
+    return empty($val)
+        ? null
+        : $val;
+}

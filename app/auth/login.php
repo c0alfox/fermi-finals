@@ -11,7 +11,7 @@ if ($_SERVER['REQUEST_METHOD'] != 'POST' && $_SERVER['REQUEST_METHOD'] != 'GET')
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     if (has_required_parameters($_POST, ['email', 'password'])) {
-        if (User\login($_POST['email'], $_POST['password'])->is_ok()) {
+        if (User\login($_POST['email'], $_POST['password'], Perms\get_all())->is_ok()) {
             header("Location: /");
             exit();
         }

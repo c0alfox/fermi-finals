@@ -60,7 +60,7 @@ $projs = User\projects($user_id)->data;
                 <?php foreach ($projs as $p): ?>
                 <div class="card mt-3">
                     <div class="card-header">
-                        <h5 class="card-title"> <?= htmlspecialchars($p['title']) ?> </h5>
+                        <h5 class="card-title m-0"> <?= htmlspecialchars($p['title']) ?> </h5>
                     </div>
                     <div class="card-body">
                         <div class="clearfix">
@@ -83,7 +83,7 @@ $projs = User\projects($user_id)->data;
     </main>
 
     <?php if ($is_self): ?>
-    <script src="/static/js/pages/profile.js" type="module"></script>
+    <script src="/static/js/profile.js" type="module"></script>
     <?php endif; ?>
 </body>
 </html>

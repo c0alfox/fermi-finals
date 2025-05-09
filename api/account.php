@@ -9,14 +9,14 @@ require_once '../auth/permissions.php';
 require_once '../auth/validation.php';
 require_once "$root/functions/user.php";
 
-try {
-    $data = json_decode(file_get_contents("php://input"), true);
-} catch (Exception $e) {
-    http_response_code(400);  # Bad Request
-    die(json_encode(['message' => 'Corpo della richiesta malformato']));
-}
-
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+    try {
+        $data = json_decode(file_get_contents("php://input"), true);
+    } catch (Exception $e) {
+        http_response_code(400);  # Bad Request
+        die(json_encode(['message' => 'Corpo della richiesta malformato']));
+    }
+
     if (
         !isset($data['password'])
         || !isset($data['name'])
@@ -99,10 +99,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET') {
             ->respond_if_error()
             ->data;
 
-        $num_proj = $num_proj == false
-            ? ['user_id' => $user_id, 'project_count' => 0]
-            : $num_proj;
-
         $projects = User\projects($user_id)
             ->respond_if_error()
             ->data;
@@ -113,7 +109,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET') {
 
     $output = [
         'message' => 'Risultati della ricerca',
-        'user_data' => array_merge($user_data, ['project_count' => $num_proj['project_count']]),
+        'user_data' => array_merge($user_data, ['project_count' => $num_proj]),
         'projects' => $projects
     ];
 
@@ -134,44 +130,38 @@ if (!Auth\has_valid_user()) {
 $user_id = Auth\get_jwt()->payload['user_id'];
 
 if ($_SERVER['REQUEST_METHOD'] == 'PUT') {
-    global $PERMISSION_ADMIN;
-
     if (!user_has_permissions(PERMISSION_ADMIN)) {
-        http_response_code(403);  # Forbidden
-        die(json_encode(['message' => 'Non hai i permessi per eseguire questa operazione']));
+        FORBIDDEN->api_response();
     }
 
-    if (!isset($data['password']) && !isset($data['bio'])) {
-        http_response_code(422);  # Unprocessable Content
-        die(json_encode(['message' => 'Sono necessari dei campi da modificare']));
-    }
+    $data = get_json_contents([])
+        ->respond_if_error()
+        ->data;
 
-    $items = [];
-    $params = [];
-
-    if (isset($data['password'])) {
-        $items[] = 'password = :password';
-        $params['password'] = password_hash($data['password'], PASSWORD_ARGON2ID);
+    if (empty($data['password']) && empty($data['bio'])) {
+        (new Response(422, 'Sono necessari campi da modificare'))
+            ->api_response();
     }
 
     if (isset($data['bio'])) {
-        $items[] = 'bio = :bio';
-        $params['bio'] = $data['bio'];
+        $resp = User\edit_bio($user_id, $data['bio'])
+            ->respond_if_error();
     }
 
-    $setClause = implode(', ', $items);
+    if (isset($data['password'])) {
+        if (!isset($data['old_password'])) {
+            (new Response(422, 'Per modificare la password è richiesta la password precendente'))
+                ->api_response();
+        }
 
-    try {
-        $sql = "UPDATE PrgUsers SET $setClause WHERE user_id = :user_id";
-        $s = $pdo->prepare($sql);
-        $success = $s->execute(array_merge(['user_id' => $user_id], $params));
-    } catch (PDOException $e) {
-        http_response_code(500);  # Internal Server Error
-        die(json_encode(['message' => 'Modifica fallita']));
+        $resp = User\edit_password(
+            $user_id,
+            $data['old_password'],
+            $data['password']
+        )->respond_if_error();
     }
 
-    http_response_code(200);  # OK
-    die(json_encode(['message' => 'Modifica avvenuta con successo', 'jwt' => Auth\get_jwt()->refresh()->to_string()]));
+    $resp->api_response();
 }
 
 if ($_SERVER['REQUEST_METHOD'] == 'DELETE') {

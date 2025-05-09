@@ -99,6 +99,41 @@ function login($email, $password, int $permissions = 0b1): Response {
     ]);
 }
 
+function edit_bio($user_id, $bio) {
+    try {
+        $pdo = connect();
+        $s = $pdo->prepare("UPDATE PrgUsers SET bio = :bio WHERE user_id = :user_id");
+        $s->execute(['user_id' => $user_id, 'bio' => $bio]);
+    } catch (\PDOException $e) {
+        return new Response(500, 'Modifica fallita');
+    }
+
+    return new Response(200, 'Modifica avvenuta con successo');
+}
+
+function edit_password($user_id, $old_password, $new_password) {
+    try {
+        $pdo = connect();
+        $s = $pdo->prepare("SELECT password FROM PrgUsers WHERE user_id = :user_id");
+        $s->execute(['user_id' => $user_id]);
+        $p_hash = $s->fetchColumn();
+
+        if (!password_verify($old_password, $p_hash)) {
+            return new Response(400, "La password vecchia è errata");
+        }
+
+        $s = $pdo->prepare("UPDATE PrgUsers SET password = :password WHERE user_id = :user_id");
+        $s->execute([
+            'user_id' => $user_id,
+            'password' => password_hash($new_password, PASSWORD_ARGON2ID)
+        ]);
+    } catch (\PDOException $e) {
+        return new Response(500, 'Modifica fallita');
+    }
+
+    return new Response(200, 'Modifica avvenuta con successo');
+}
+
 function project_count($user_id, $suppose_user_exists = true) {
     try {
         $pdo = connect();
