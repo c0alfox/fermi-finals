@@ -7,11 +7,14 @@ $is_own = false;
 <!DOCTYPE html>
 <html lang="it">
 <head>
-    <?php include "$root/components/head.php" ?>
+    <?php 
+        include "$root/components/head.php";
+        include "$root/components/navbar.php";
+    ?>
     <title> Dettagli Progetto </title>
 </head>
 <body class="container">
-    <?php include "$root/components/navbar.php"; navbar() ?>
+    <?php navbar() ?>
 
     <h1 class="text-center mt-2"> <?= htmlspecialchars("Titolo progetto") ?> </h1>
     <p> <?= htmlspecialchars("abstract") ?></p>

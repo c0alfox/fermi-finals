@@ -71,3 +71,41 @@
 .editable:focus::after {
     opacity: 1;
 }
+
+#notificationDropdown {
+    margin-right: .8rem;
+}
+
+.notification-bell {
+    display: block;
+    aspect-ratio: 1 / 1;
+    width: 25px;
+
+    background-image: url('/static/svg/bell.svg');
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+}
+
+.notification-list {
+    max-height: 430px;
+    overflow-y: auto;
+    width: 350px;
+}
+
+
+.notification-item {
+    border-bottom: 1px solid rgba(0,0,0,.125);
+}
+
+.notification-badge {
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    font-size: 0.65rem;
+}
+
+.notification-content {
+    white-space: normal;
+    word-wrap: break-word;
+}

@@ -1,7 +1,6 @@
 <?php
 require_once "../prelude.php";
 require_once "$root/auth/authentication.php";
-require_once "$root/components/navbar.php";
 require_once "$root/functions/user.php";
 
 $user_id = Auth\get_user_id();
@@ -28,7 +27,10 @@ $projs = User\projects($user_id)->data;
 <!DOCTYPE html>
 <html lang="it">
 <head>
-    <?php include "$root/components/head.php" ?>
+    <?php
+    include "$root/components/head.php";
+    include "$root/components/navbar.php";
+    ?>
     <title> Profilo di <?= $full_name ?> </title>
 </head>
 <body>
@@ -65,7 +67,7 @@ $projs = User\projects($user_id)->data;
                     <div class="card-body">
                         <div class="clearfix">
                             <p class="float-start">Totale revisioni: <?= $p['revision_count'] ?> </p>
-                            <p class="float-end">Creato il: <?= date('d/m/Y H:i:s', strtotime($p['project_datetime']))?> </p>
+                            <p class="float-end">Creato il <?= date('d/m/Y \a\l\l\e H:i:s', strtotime($p['project_datetime']))?> </p>
                         </div>
                         <?php if ($p['abstract'] === null): ?>
                             <p class="card-text italic"> Il progetto non ha abstract </p>

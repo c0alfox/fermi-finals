@@ -2,10 +2,13 @@
 <!DOCTYPE html>
 <html lang="it">
 <head>
-    <?php include "$root/components/head.php" ?>
+    <?php
+    include "$root/components/head.php";
+    include "$root/components/navbar.php";
+    ?>
     <title> Pagina Principale </title>
 </head>
 <body>
-    <?php include "$root/components/navbar.php"; navbar() ?>
+    <?php navbar() ?>
 </body>
 </html>
