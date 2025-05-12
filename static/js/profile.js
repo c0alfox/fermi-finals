@@ -13,6 +13,9 @@ bio.on('endEdit', async e => {
         'bio': val
     }).then(resp => {
         if (!resp.ok) {
+            if (resp.status == 401) {
+                window.location.assign('/app/auth/login.php');
+            }
             e.reset();
             error_popup.setResponse(resp).show();
         } else {
