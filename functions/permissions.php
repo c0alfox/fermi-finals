@@ -3,7 +3,7 @@ namespace Perms;
 
 use \Auth as Auth;
 
-require_once 'prelude.php';
+require_once 'functions_prelude.php';
 require_once "$root/auth/authentication.php";
 
 function get(int $default = PERMISSION_READ) {

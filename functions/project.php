@@ -1,7 +1,7 @@
 <?php
 namespace Project;
 
-require_once 'prelude.php';
+require_once 'functions_prelude.php';
 
 function get(int $project_id): \Response {
     $pdo = connect();

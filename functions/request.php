@@ -1,5 +1,5 @@
 <?php
-require_once 'prelude.php';
+require_once 'functions_prelude.php';
 
 function get_json_contents(array $required_params): Response {
     try {

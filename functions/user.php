@@ -1,7 +1,7 @@
 <?php
 namespace User;
 
-require_once 'prelude.php';
+require_once 'functions_prelude.php';
 use Response;
 
 function exists($user_id): bool {
