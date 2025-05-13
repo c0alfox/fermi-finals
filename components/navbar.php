@@ -1,7 +1,7 @@
 <script type="module" src="/static/js/components/navbar.js" defer></script>
 
 <?php
-require_once 'prelude.php';
+require_once 'components_prelude.php';
 require_once "notification.php";
 
 require_once "$root/auth/authentication.php";

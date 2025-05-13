@@ -1,5 +1,5 @@
 <?php
-require_once "prelude.php";
+require_once "components_prelude.php";
 
 function notification($notif) { ?>
 <div class="notification-item p-3">
