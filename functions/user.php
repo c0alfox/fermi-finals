@@ -134,6 +134,26 @@ function edit_password($user_id, $old_password, $new_password) {
     return new Response(200, 'Modifica avvenuta con successo');
 }
 
+function create(string $email, string $name, string $surname, string $password, string|null $bio) {
+    try {
+        $pdo = connect();
+        $sql = "INSERT INTO PrgUsers (email, name, surname, password, bio)
+            VALUES (:email, :name, :surname, :password, :bio)";
+        $s = $pdo->prepare($sql);
+        $s->execute([
+            'email' => $email,
+            'name' => $name,
+            'surname' => $surname,
+            'password' => password_hash($password, PASSWORD_DEFAULT),
+            'bio' => $bio
+        ]);
+    } catch (\PDOException $e) {
+        return new Response(500, 'Utente non creato');
+    }
+
+    return new Response(201, 'Utente creato con successo');
+}
+
 function project_count($user_id, $suppose_user_exists = true) {
     try {
         $pdo = connect();

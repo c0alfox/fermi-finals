@@ -10,23 +10,17 @@ require_once '../auth/validation.php';
 require_once "$root/functions/user.php";
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-    try {
-        $data = json_decode(file_get_contents("php://input"), true);
-    } catch (Exception $e) {
-        http_response_code(400);  # Bad Request
-        die(json_encode(['message' => 'Corpo della richiesta malformato']));
-    }
+    $data = get_json_contents([
+        'password',
+        'name',
+        'surname',
+        'email',
+        'password_confirm'
+    ])->respond_if_error()->data;
 
-    if (
-        !isset($data['password'])
-        || !isset($data['name'])
-        || !isset($data['surname'])
-        || !isset($data['email'])
-        || !isset($data['password_confirm'])
-    ) {
-
-        http_response_code(400);  # Bad Request
-        die(json_encode(['message' => 'Parametri richiesti mancanti', 'data' => $data]));
+    if ($data['password'] != $data['password_confirm']) {
+        http_response_code(422);
+        die(json_encode(['message' => 'Le password non combaciano']));
     }
 
     if (!is_valid_email($data['email'])) {
@@ -39,39 +33,12 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         die(json_encode(['message' => 'Password non valida']));
     }
 
-    if ($data['password'] != $data['password_confirm']) {
-        http_response_code(422);
-        die(json_encode(['message' => 'Le password non combaciano']));
-    }
-
     if (!isset($data['bio'])) {
         $data['bio'] = NULL;
     }
 
-    try {
-        $sql = "INSERT INTO PrgUsers (email, name, surname, password, bio)
-            VALUES (:email, :name, :surname, :password, :bio)";
-        $s = $pdo->prepare($sql);
-        $success = $s->execute([
-            'email' => $data['email'],
-            'name' => $data['name'],
-            'surname' => $data['surname'],
-            'password' => password_hash($data['password'], PASSWORD_DEFAULT),
-            'bio' => $data['bio']
-        ]);
-    } catch (PDOException $e) {
-        http_response_code(500);  # Internal Server Error
-        die(json_encode(['message' => 'Utente non creato']));
-    }
-
-    if (!$success) {
-        http_response_code(500);  # Internal Server Error
-        die(json_encode(['message' => 'Utente non creato']));
-    }
-
-    http_response_code(201);  # Created
-    echo (json_encode(['message' => 'Utente creato con successo']));
-    exit();
+    User\create($data['email'], $data['name'], $data['surname'], $data['password'], $data['bio'])
+        ->api_response();
 }
 
 if ($_SERVER['REQUEST_METHOD'] == 'GET') {

@@ -120,3 +120,17 @@
     white-space: normal;
     word-wrap: break-word;
 }
+
+.search-item {
+    transition: background-color 0.12s ease-in-out;
+    cursor: pointer;
+}
+
+.search-item:hover {
+    background-color: whitesmoke;
+}
+
+.search-link {
+    color: black;
+    text-decoration: none !important;
+}

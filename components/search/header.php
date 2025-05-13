@@ -1,8 +1,8 @@
 <?php 
 namespace Search;
 
-function header($title) { ?>
-<div class="p-2 bg-light border-bottom">
-    <small class="text-muted fw-bold"> <?= htmlspecialchars($title) ?> </small>
+function header($title, $round = false) { ?>
+<div class="p-2 bg-primary-subtle border-bottom <?= $round ? 'rounded-top' : '' ?>">
+    <small class="fw-bold"> <?= htmlspecialchars($title) ?> </small>
 </div>
 <?php } ?>

@@ -30,3 +30,12 @@ function connect(): PDO|null {
         return null;
     }
 }
+
+function crop(string|null $str, int $len = 100): string|null {
+    if ($str === null) {
+        return $str;
+    }
+
+    $substr = mb_substr($str, 0, $len);
+    return strlen($substr) == strlen($str) ? $str : "$substr...";
+}
