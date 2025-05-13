@@ -30,7 +30,7 @@ function navbar()
                 <div>
                     <div class="nav-item dropdown position-relative d-inline">
                         <a class="nav-link px-3 position-relative" href="#" id="notificationDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                            <i class="notification-bell"></i>
+                            <i class="icon notification-bell"></i>
                             <span class="notification-badge badge rounded-pill bg-danger 
                                 <?= $count == 0 ? 'd-none' : '' ?>"> <?= $count ?> </span>
                         </a>

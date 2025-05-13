@@ -14,8 +14,6 @@ if (isset($_GET['id']) && is_numeric($_GET['id'])) {
     die();
 }
 
-Auth\refresh_token();
-
 $user = User\fetch($user_id)
     ->die_if_error()
     ->data;
