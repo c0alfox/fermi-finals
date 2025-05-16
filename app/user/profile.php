@@ -4,15 +4,17 @@ require_once "$root/auth/authentication.php";
 require_once "$root/functions/user.php";
 
 $user_id = Auth\get_user_id();
-$is_self = true;
+$get_user_id = null;
 
 if (isset($_GET['id']) && is_numeric($_GET['id'])) {
-	$user_id = $_GET['id'];
-    $is_self = false;
+	$get_user_id = $_GET['id'];
 } elseif ($user_id === null) {
     header('Location: /app/auth/login.php');
     die();
 }
+
+$is_self = $user_id == $get_user_id;
+$user_id = $get_user_id ?? $user_id;
 
 $user = User\fetch($user_id)
     ->die_if_error()

@@ -134,3 +134,12 @@
     color: black;
     text-decoration: none !important;
 }
+
+#searchSuggestions {
+    transition: opacity 0.12s ease-in-out;
+    opacity: 0;
+}
+
+#searchSuggestions.active {
+    opacity: 1;
+}

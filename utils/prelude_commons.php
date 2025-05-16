@@ -39,3 +39,11 @@ function crop(string|null $str, int $len = 100): string|null {
     $substr = mb_substr($str, 0, $len);
     return strlen($substr) == strlen($str) ? $str : "$substr...";
 }
+
+function first_line(string|null $str): string|null {
+    if ($str === null) {
+        return null;
+    }
+
+    return preg_split('#\r?\n#', $str, 2)[0];
+}

@@ -10,7 +10,7 @@ function user_element(int $id, string $name, string $surn, int|null $date, strin
         </div>
         <div class="ms-4 ps-1 mt-1">
             <small class="text-muted">
-                <?= $body === null ? "<i> L'utente non ha una biografia </i>" : htmlspecialchars(crop($body, 90)) ?>
+                <?= $body === null ? "<i> L'utente non ha una biografia </i>" : htmlspecialchars($body) ?>
             </small>
         </div>
     </div>
@@ -30,7 +30,7 @@ function project_element(int $id, string $title, string $auth_name, string $auth
         </div>
         <div class="ms-4 ps-1 mt-1">
             <small class="text-muted">
-                <?= $body === null ? "<i> Il progetto non ha un abstract </i>" : htmlspecialchars(crop($body, 90)) ?>
+                <?= $body === null ? "<i> Il progetto non ha un abstract </i>" : htmlspecialchars($body) ?>
             </small>
         </div>
     </div>
@@ -39,6 +39,6 @@ function project_element(int $id, string $title, string $auth_name, string $auth
 
 function empty_element() {?>
 <div class="search-item p-3">
-    <p class="text-center italic"> Nessun risultato trovato </p>
+    <p class="text-center italic mb-0"> Nessun risultato trovato </p>
 </div>
 <?php } ?>

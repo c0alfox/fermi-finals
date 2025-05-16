@@ -12,7 +12,7 @@ class Response {
         $this->data = $data;
     }
 
-    public function api_response($refresh_jwt = false) {
+    public function api_response($refresh_jwt = true) {
         http_response_code($this->response_code);
 
         $next_jwt = Auth\get_jwt();

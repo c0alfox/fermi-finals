@@ -35,6 +35,10 @@ function projects(string|null $query = null, int $limit = 3): Response {
         ]);
     }
 
+    foreach ($proj_data as &$proj) {
+        $proj['abstract'] = crop(first_line($proj['abstract']), 90);
+    }
+
     return new Response(200, 'Risultati della ricerca', [
         'count' => $s->rowCount(),
         'content' => $proj_data
@@ -66,6 +70,10 @@ function users(string|null $query = null, int $limit = 3): Response {
             'count' => 0,
             'content' => []
         ]);
+    }
+
+    foreach ($data as &$user) {
+        $user['bio'] = crop(first_line($user['bio']), 90);
     }
 
     return new Response(200, 'Risultati della ricerca', [
