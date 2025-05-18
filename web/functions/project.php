@@ -4,8 +4,8 @@ namespace Project;
 require_once 'functions_prelude.php';
 
 function get(int $project_id): \Response {
-    $pdo = connect();
     try {
+        $pdo = connect();
         $s = $pdo->prepare('SELECT name, surname, email, title, abstract, project_datetime, COUNT(revision_id) AS revision_count
             FROM PrgProjects 
             JOIN PrgUsers USING(user_id)
@@ -62,4 +62,28 @@ function create(int $uid, string $title, string|null $abstract): \Response {
     }
 
     return new \Response(201, 'Creazione avvenuta con successo');
+}
+
+function user_can_edit(int|null $user_id, int $project_id): \Response {
+    if ($user_id === null) {
+        return new \Response(200, 'Risultati della ricerca', false);
+    }
+
+    try {
+        $pdo = connect();
+        $s = $pdo->prepare('SELECT user_id
+            FROM PrgProjects 
+            WHERE project_id = :id');
+        $s->execute(['id' => $project_id]);
+
+        if (!$s->rowCount()) {
+            return new \Response(404, 'Progetto non trovato', false);
+        }
+        
+        $p = $s->fetch(\PDO::FETCH_ASSOC);
+    } catch (\PDOException $e) {
+        return new \Response(500, 'Ricerca fallita');
+    }
+
+    return new \Response(200, 'Risultati della ricerca', $p['user_id'] == $user_id);
 }
