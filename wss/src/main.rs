@@ -1,5 +1,6 @@
-mod handler;
 mod macros;
+mod routes;
+mod filters;
 
 use warp::Filter;
 
@@ -7,15 +8,12 @@ use warp::Filter;
 async fn main() {
     info!("Application started");
     
-    let health = warp::path!("health")
-        .and_then(handler::health_handler);
+    let preprocess = filters::log_request();
+    let routes = routes::api().or(routes::ws());
+    let postprocess = warp::any();
 
-    info!("Created health route");
+    let server = preprocess.and(routes.and(postprocess));
 
-    let routes = health
-        .with(warp::cors().allow_any_origin());
-
-    info!("Created base route");
-
-    warp::serve(routes).run(([0, 0, 0, 0], 8888)).await;
+    info!("Server started");
+    warp::serve(server).run(([0, 0, 0, 0], 8888)).await;
 }
