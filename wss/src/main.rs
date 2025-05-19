@@ -12,7 +12,10 @@ async fn main() {
     let routes = routes::api().or(routes::ws());
     let postprocess = warp::any();
 
-    let server = preprocess.and(routes.and(postprocess));
+    let server = preprocess
+        .and(routes)
+        .and(postprocess)
+        .with(warp::cors().allow_any_origin());
 
     info!("Server started");
     warp::serve(server).run(([0, 0, 0, 0], 8888)).await;
