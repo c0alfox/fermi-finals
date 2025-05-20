@@ -1,10 +1,15 @@
-mod structs;
+pub mod db;
+
 mod api;
+mod structs;
 mod wss;
 
-use warp::{Filter, Reply, Rejection};
+use db::DBPoolRef;
+use warp::{Filter, Rejection, Reply};
 
-pub fn api() -> impl Filter<Extract = (impl Reply, ), Error = Rejection> + Clone {
+pub fn api(
+    db_pool: DBPoolRef,
+) -> impl Filter<Extract = (impl Reply,), Error = Rejection> + Clone {
     let root = warp::path("api");
 
     let health = root
@@ -12,16 +17,17 @@ pub fn api() -> impl Filter<Extract = (impl Reply, ), Error = Rejection> + Clone
         .and(warp::path::end())
         .and_then(api::health);
 
-    health
-        .or(api::notifs())
+    let notifs = root.and(api::notifs(db_pool));
+
+    health.or(notifs)
 }
 
-pub fn ws() -> impl Filter<Extract = (impl Reply, ), Error = Rejection> + Clone  {
+pub fn ws(
+    _db_pool: DBPoolRef,
+) -> impl Filter<Extract = (impl Reply,), Error = Rejection> + Clone {
     let root = warp::path("ws");
 
-    let recv = root
-        .and(warp::path("recv"))
-        .and_then(wss::recv);
+    let recv = root.and(warp::path("recv")).and_then(wss::recv);
 
     recv
 }

@@ -1,12 +1,16 @@
-use crate::*;
 use super::structs::Notification;
-use warp::{Filter, Reply, Rejection, http::StatusCode};
+use crate::*;
 
-pub fn notifs() -> impl Filter<Extract = (impl Reply, ), Error = Rejection> + Clone {
+use warp::{http::StatusCode, reject::reject, Filter, Rejection, Reply};
+
+pub fn notifs(
+    db_pool: DBPoolRef,
+) -> impl Filter<Extract = (impl Reply,), Error = Rejection> + Clone {
     let root = warp::path("notifs");
 
     let send = root
         .and(warp::path("send"))
+        .and(with_dbpool(db_pool))
         .and(warp::post())
         .and(warp::body::json())
         .and_then(send);
@@ -14,12 +18,21 @@ pub fn notifs() -> impl Filter<Extract = (impl Reply, ), Error = Rejection> + Cl
     send
 }
 
-pub fn health() -> impl Future<Output = Result<impl warp::Reply, warp::Rejection>> {
+pub async fn health() -> Result<impl warp::Reply, warp::Rejection> {
     info!("Received health ping");
-    futures::future::ready(Ok(StatusCode::OK))
+    Ok(StatusCode::OK)
 }
 
-pub fn send(body: Notification) -> impl Future<Output = Result<impl warp::Reply, warp::Rejection>> {
+pub async fn send(
+    db_pool: DBPoolRef,
+    body: Notification,
+) -> Result<impl warp::Reply, warp::Rejection> {
     info!("Send notification endpoint reached, received {:?}", body);
-    futures::future::ready(Ok(StatusCode::OK))
+
+    let conn = match acquire_from(db_pool).await {
+        Ok(v) => v,
+        Err(_) => return Err(reject()),
+    };
+
+    Ok(StatusCode::OK)
 }
