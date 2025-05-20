@@ -1,14 +1,10 @@
 use crate::*;
 
-use sqlx::{mysql::MySqlPool, pool::PoolConnection, MySql};
+use sqlx::mysql::MySqlPool;
 use std::env;
 
 pub type DBPool = MySqlPool;
 pub type DBPoolRef = &'static DBPool;
-pub type DBConnection = PoolConnection<MySql>;
-pub type DBConnectionRef = &'static DBConnection;
-
-pub const ACQUIRE_RETRIES: u32 = 5;
 
 pub enum DBError {
     VarError,
@@ -50,19 +46,4 @@ pub async fn connect() -> Result<DBPool, DBError> {
     };
 
     Ok(pool)
-}
-
-pub async fn acquire_from(db_pool: DBPoolRef) -> Result<DBConnection, sqlx::Error> {
-    for i in 0..ACQUIRE_RETRIES {
-        match db_pool.acquire().await {
-            Ok(v) => {
-                info!("Connection acquired after {} tries", i+1);
-                return Ok(v)
-            },
-            _ => {}
-        }
-    }
-
-    warn!("Couldn't acquire after {} tries", ACQUIRE_RETRIES);
-    Err(sqlx::Error::PoolTimedOut)
 }

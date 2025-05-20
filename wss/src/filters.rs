@@ -1,5 +1,5 @@
 use crate::*;
-use warp::{path::FullPath, reject::Rejection, Filter};
+use warp::{path::FullPath, Filter};
 
 pub fn log_request() -> impl Filter<Extract = (), Error = std::convert::Infallible> + Clone {
     warp::path::full()
