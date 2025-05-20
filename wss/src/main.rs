@@ -24,13 +24,12 @@ async fn main() {
 
     let preprocess = filters::log_request();
     let routes = routes::api(&db_pool).or(routes::ws(&db_pool));
-    let postprocess = warp::any();
     info!("Routes registered");
 
     let server = preprocess
         .and(routes)
-        .and(postprocess)
-        .with(warp::cors().allow_any_origin());
+        .with(warp::cors().allow_any_origin())
+        .recover(routes::recover);
 
     info!("Server started");
     warp::serve(server).run(([0, 0, 0, 0], 8888)).await;

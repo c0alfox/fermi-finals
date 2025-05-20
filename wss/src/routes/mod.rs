@@ -4,6 +4,8 @@ mod api;
 mod structs;
 mod wss;
 
+use crate::{log, warn};
+
 use db::DBPoolRef;
 use warp::{Filter, Rejection, Reply};
 
@@ -30,4 +32,9 @@ pub fn ws(
     let recv = root.and(warp::path("recv")).and_then(wss::recv);
 
     recv
+}
+
+pub async fn recover(_r: Rejection) -> Result<impl Reply, std::convert::Infallible> {
+    warn!("Route not matched");
+    Ok(warp::http::StatusCode::NOT_FOUND)
 }
