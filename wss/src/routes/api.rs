@@ -1,7 +1,7 @@
-use super::structs::Notification;
+use super::structs::{Notification, PartialNotification};
 use crate::*;
 
-use warp::{http::StatusCode, http::Response, Filter, Rejection, Reply};
+use warp::{http::StatusCode, Filter, Rejection, Reply};
 
 pub fn notifs(
     db_pool: DBPoolRef,
@@ -13,7 +13,18 @@ pub fn notifs(
         .and(with_dbpool(db_pool))
         .and(warp::post())
         .and(warp::body::json())
-        .and_then(send);
+        .and_then(send)
+        .recover(async |rej: Rejection| {
+            if let Some(_) = rej.find::<warp::reject::MethodNotAllowed>() {
+                return Ok(StatusCode::METHOD_NOT_ALLOWED);
+            }
+
+            if let Some(_) = rej.find::<warp::body::BodyDeserializeError>() {
+                return Ok(StatusCode::BAD_REQUEST);
+            }
+
+            Err(warp::reject())
+        });
 
     let show = root
         .and(with_dbpool(db_pool))
@@ -31,11 +42,32 @@ pub async fn health() -> Result<impl warp::Reply, warp::Rejection> {
 }
 
 pub async fn send(
-    _db_pool: DBPoolRef,
-    body: Notification,
+    db_pool: DBPoolRef,
+    body: PartialNotification
 ) -> Result<impl warp::Reply, warp::Rejection> {
     info!("Send notification endpoint reached, received {:?}", body);
-    Ok(StatusCode::OK)
+
+    let res =
+        sqlx::query("INSERT INTO PrgNotifications (title, description, action_link, user_id) VALUES (?, ?, ?, ?)")
+        .bind(body.title)
+        .bind(body.description)
+        .bind(body.action_link)
+        .bind(body.user_id)
+        .execute(db_pool)
+        .await;
+
+    if let Err(e) = res {
+        warn!("Failed to execute query, error {:?}", e);
+        return api_response!(
+            StatusCode::INTERNAL_SERVER_ERROR, "Errore nell'inserimento";
+            warp::reject()
+        )
+    }
+
+    api_response!(
+        StatusCode::OK, "Notifica aggiunta con successo";
+        warp::reject()
+    )
 }
 
 pub async fn show(
@@ -52,23 +84,17 @@ pub async fn show(
 
     if let Err(e) = res {
         warn!("Failed to execute query, error {:?}", e);
-
-        return Ok(
-            Response::builder()
-                .status(StatusCode::INTERNAL_SERVER_ERROR)
-                .header("Content-Type", "application/json")
-                .body("".to_string())
-        );
+        return api_response!(
+            StatusCode::INTERNAL_SERVER_ERROR, "Errore nell'inserimento";
+            warp::reject()
+        )
     }
 
     let res = res.unwrap();
 
     info!("Query successful");
-
-    Ok(
-        Response::builder()
-            .status(StatusCode::OK)
-            .header("Content-Type", "application/json")
-            .body(serde_json::to_string(&res).unwrap())
+    api_response!(
+        StatusCode::OK, "Risultati della ricerca", serde_json::json!(res);
+        warp::reject()
     )
 }
