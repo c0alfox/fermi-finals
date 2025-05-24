@@ -55,3 +55,85 @@ function count($user_id, $suppose_user_exists = true): Response {
 
     return new Response(200, 'Ricerca avvenuta con successo', $data);
 }
+
+function is_own($notif_id, $user_id, $suppose_user_exists = true): Response {
+    try {
+        $pdo = connect();
+        $s = $pdo->prepare("SELECT *
+            FROM PrgNotifications
+            WHERE notification_id = :id");
+        $s->execute(['id' => $notif_id]);
+        $data = $s->fetch(PDO::FETCH_ASSOC);
+        $pdo = null;
+
+        if (!$s->rowCount()) {
+            return new Response(404, 'Notifica non trovata');
+        }
+
+        if (!$suppose_user_exists && !User\exists($user_id)) {
+            return new Response(422, 'Utente inesistente');
+        }
+
+    } catch(\PDOException $e) {
+        return new Response(500, 'Errore nella ricerca');
+    }
+
+    return new Response(
+        200,
+        'Risultato della ricerca',
+        $data['user_id'] == $user_id
+    );
+}
+
+function exists($notif_id): Response {
+    try {
+        $pdo = connect();
+        $s = $pdo->prepare("SELECT 1
+            FROM PrgNotifications
+            WHERE notification_id = :id");
+        $s->execute(['id' => $notif_id]);
+        $pdo = null;
+
+        if (!$s->rowCount()) {
+            return new Response(404, 'Notifica non trovata', false);
+        }
+    } catch(\PDOException $e) {
+        return new Response(500, 'Errore nella ricerca');
+    }
+
+    return new Response(
+        200,
+        'Notifica esistente',
+        true
+    );
+}
+
+function delete($notif_id, $suppose_notif_exists = true): Response {
+    if (!$suppose_notif_exists) {
+        $exists = exists($notif_id);
+        if ($exists->response_code == 500) {
+            return $exists;
+        }
+
+        if (!$exists->data) {
+            return new Response(422, 'Notifica inesistente');
+        }
+    }
+
+    try {
+        $pdo = connect();
+        $s = $pdo->prepare("DELETE
+            FROM PrgNotifications
+            WHERE notification_id = :id");
+        $s->execute(['id' => $notif_id]);
+        $data = $s->fetch(PDO::FETCH_ASSOC);
+        $pdo = null;
+    } catch(\PDOException $e) {
+        return new Response(500, "Errore nell'eliminazione");
+    }
+
+    return new Response(
+        200,
+        'Notifica eliminata con successo',
+    );
+}
