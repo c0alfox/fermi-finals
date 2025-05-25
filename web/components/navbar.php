@@ -2,7 +2,7 @@
 
 <?php
 require_once 'components_prelude.php';
-require_once "notification.php";
+require_once "navbar/notification.php";
 
 require_once "$root/auth/authentication.php";
 require_once "$root/functions/user.php";
@@ -21,7 +21,7 @@ function navbar()
             <div class="collapse navbar-collapse" id="navbarNav">
                 <div class="navbar-nav me-auto">
                     <a class="nav-link active" aria-current="page" href="/">Home</a>
-                    <a class="nav-link" href="">Features</a>
+                    <!--<a class="nav-link" href="">Features</a>-->
                 </div>
 
                 <?php if ($userstring !== null):

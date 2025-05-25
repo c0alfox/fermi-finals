@@ -1,11 +1,9 @@
 <?php
-require_once "components_prelude.php";
-
 function notification($notif) { ?>
 <div class="notification-item p-3">
     <div class="d-flex justify-content-between align-items-start mb-2">
         <h6 class="fw-bold mb-0"> <?= htmlspecialchars($notif['title']) ?> </h6>
-        <button type="button" class="btn-close" aria-label="Close"></button>
+        <button type="button" class="btn-close notif-close" aria-label="Close" data-id="<?= $notif['notification_id']?>"></button>
     </div>
     <p class="notification-content text-muted mb-2">
     <?= !empty($notif['description'])
