@@ -34,7 +34,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'DELETE') {
         FORBIDDEN->api_response();
     }
 
-    Notifications\delete($_GET['id']);
+    Notifications\delete($_GET['id'])->api_response();
 }
 
 UNSUPPORTED_METHOD->api_response();

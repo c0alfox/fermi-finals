@@ -1,5 +1,3 @@
-<script type="module" src="/static/js/components/navbar.js" defer></script>
-
 <?php
 require_once 'components_prelude.php';
 require_once "navbar/notification.php";
@@ -8,11 +6,16 @@ require_once "$root/auth/authentication.php";
 require_once "$root/functions/user.php";
 require_once "$root/functions/notifications.php";
 
-function navbar()
-{
-    $user_id = Auth\get_user_id();
-    $userstring = User\get_userstring($user_id);
-?>
+$user_id = Auth\get_user_id();
+$userstring = User\get_userstring($user_id);
+
+if ($user_id !== null): ?>
+<script type="module" src="/static/js/components/navbar.js" defer></script>
+<?php endif;
+
+function navbar() { 
+    global $user_id, $userstring;
+    ?>
     <nav id="navbar_id" class="navbar navbar-expand-lg fixed-top bg-primary bg-gradient">
         <div class="container">
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
@@ -29,9 +32,9 @@ function navbar()
                     $notifs = Notifications\fetch($user_id)->data; ?>
                 <div>
                     <div class="nav-item dropdown position-relative d-inline">
-                        <a class="nav-link px-3 position-relative" href="#" id="notificationDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        <a class="nav-link px-3 position-relative" href="#" id="notificationDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false" data-bs-auto-close="outside">
                             <i class="icon notification-bell"></i>
-                            <span class="notification-badge badge rounded-pill bg-danger 
+                            <span id="notification-badge" class="notification-badge badge rounded-pill bg-danger 
                                 <?= $count == 0 ? 'd-none' : '' ?>"> <?= $count ?> </span>
                         </a>
                         <div class="dropdown-menu dropdown-menu-end shadow notification-list p-0" aria-labelledby="notificationDropdown">
