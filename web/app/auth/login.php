@@ -43,7 +43,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                     <input type="password" class="form-control" id="password" name="password">
                 </div>
                 <?php if ($_SERVER["REQUEST_METHOD"] == "POST"): ?>
-                    <p class="text-danger text-center"> Indirizzo e-mail o password non validi </p>
+                    <p class="text-danger text-center mb-0"> Indirizzo e-mail o password non validi </p>
                 <?php endif; ?>
                 <button type="submit" class="btn btn-primary bg-gradient shadow-sm d-block mx-auto">Submit</button>
             </form>
