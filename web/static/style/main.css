@@ -44,7 +44,7 @@
     transform: translateY(-50%);
 }
 
-.editable {
+.pre-line {
     white-space: pre-line;
 }
 

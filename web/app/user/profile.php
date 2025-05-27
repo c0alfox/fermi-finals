@@ -13,7 +13,7 @@ if (isset($_GET['id']) && is_numeric($_GET['id'])) {
     die();
 }
 
-$is_self = $user_id == $get_user_id;
+$is_self = $get_user_id === null || $user_id == $get_user_id;
 $user_id = $get_user_id ?? $user_id;
 
 $user = User\fetch($user_id)
@@ -43,9 +43,9 @@ $projs = User\projects($user_id)->data;
         </div>
         <h2> Biografia </h2>
         <?php if (empty($user['bio'])): ?>
-            <p class="mx-5 muted italic" id="bio" data-empty> Nessuna biografia inserita </p>
+            <p class="mx-5 muted italic pre-line" id="bio" data-empty> Nessuna biografia inserita </p>
         <?php else: ?>
-            <p class="mx-5" id="bio"> <?= htmlspecialchars($user['bio']) ?> </p>
+            <p class="mx-5 pre-line" id="bio"> <?= htmlspecialchars($user['bio']) ?> </p>
         <?php endif; ?>
         
         <div class="clearfix">

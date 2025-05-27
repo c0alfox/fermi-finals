@@ -46,6 +46,7 @@ export default class Editable {
         this.element = element;
         this.element.contentEditable = true;
         this.element.classList.add('editable');
+        this.element.classList.add('pre-line');
 
         this.lastValidValue = this.element.innerText;
         this.#defaultText = defaultText;
