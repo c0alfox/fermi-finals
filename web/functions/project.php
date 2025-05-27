@@ -20,12 +20,16 @@ function get(int $project_id): \Response {
         
         $proj_data = $s->fetch(\PDO::FETCH_ASSOC);
 
-        $s = $pdo->prepare('SELECT revision_number, revision_datetime, start_date, end_date
+        $s = $pdo->prepare('SELECT revision_number, motivations, revision_datetime, start_date, end_date
             FROM PrgRevisions 
             WHERE project_id = :id AND (permissions_id & 0b00001) != 0');
         $s->execute(['id' => $project_id]);
 
         $rev_data = $s->fetchAll(\PDO::FETCH_ASSOC);
+
+        foreach ($rev_data as $r) {
+            $r['motivations'] = crop(first_line($r['motivations']));
+        }
     } catch (\PDOException $e) {
         return new \Response(500, 'Ricerca fallita');
     }

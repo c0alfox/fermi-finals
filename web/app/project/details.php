@@ -39,33 +39,26 @@ $project = Project\get($project_id)
     <?php endif; ?>
 
     <h2> Revisioni (<?= $project['project_data']['revision_count'] ?>) </h2>
-    <?php if ($p_count == 0): ?>
-        <p class="mx-5 muted italic"> Nessun progetto caricato </p>
-    <?php else: ?>
-        <div class="mx-5">
-            <?php foreach ($projs as $p): ?>
-            <div class="card mt-3">
-                <div class="card-header">
-                    <h5 class="card-title m-0"> <?= htmlspecialchars($p['title']) ?> </h5>
-                </div>
-                <div class="card-body">
-                    <div class="clearfix">
-                        <p class="float-start">Totale revisioni: <?= $p['revision_count'] ?> </p>
-                        <p class="float-end">Creato il <?= date('d/m/Y \a\l\l\e H:i:s', strtotime($p['project_datetime']))?> </p>
-                    </div>
-                    <?php if ($p['abstract'] === null): ?>
-                        <p class="card-text italic"> Il progetto non ha abstract </p>
-                    <?php else: ?>
-                        <p class="card-text"> <?= htmlspecialchars($p['abstract']) ?> </p>
-                    <?php endif; ?>
-                </div>
-                <div class="card-footer">
-                    <a href="/app/project/details.php?id=<?= $p['project_id'] ?>" class="btn btn-primary float-end">Vai</a>
-                </div>
+    <div class="mx-5">
+        <?php foreach ($project['revisions'] as $r): ?>
+        <div class="card mt-3">
+            <div class="card-header clearfix">
+                <h5 class="card-title m-0 float-start"> Revisione <?= $r['revision_number'] ?> </h5>
+                <p class="float-end m-0">Del <?= date('d/m/Y \a\l\l\e H:i:s', strtotime($r['revision_datetime']))?> </p>
             </div>
-            <?php endforeach; ?>
+            <div class="card-body">
+                <?php if ($r['motivations'] === null): ?>
+                    <p class="card-text italic"> La revisione del progetto non è stata motivata </p>
+                <?php else: ?>
+                    <p class="card-text"> <?= htmlspecialchars($r['motivations']) ?> </p>
+                <?php endif; ?>
+            </div>
+            <div class="card-footer">
+                <a href="#" class="btn btn-primary float-end">Vai</a>
+            </div>
         </div>
-    <?php endif; ?>
+        <?php endforeach; ?>
+    </div>
 
     <?php if ($can_edit): ?>
     <script src="/static/js/project.js" type="module"></script>
