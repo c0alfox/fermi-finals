@@ -81,3 +81,33 @@ function users(string|null $query = null, int $limit = 3): Response {
         'content' => $data
     ]);
 }
+
+function featured(int $limit = 3): Response {
+    try {
+        $pdo = connect();
+        $s = $pdo->prepare("SELECT title, abstract, project_datetime, name, surname
+            FROM PrgProjects
+            LIMIT :lim
+            ORDER BY project_datetime DESC");
+        $s->bindParam('lim', $limit, \PDO::PARAM_INT);
+        $s->execute();
+        $pdo = null;
+
+        $data = $s->fetchAll(\PDO::FETCH_ASSOC);
+
+    } catch (\PDOException $e) {
+        return new Response(500, 'Ricerca fallita', [
+            'count' => 0,
+            'content' => []
+        ]);
+    }
+
+    foreach ($data as &$project) {
+        $project['abstract'] = crop(first_line($project['abstract']), 90);
+    }
+
+    return new Response(200, 'Risultati della ricerca', [
+        'count' => $s->rowCount(),
+        'content' => $data
+    ]);
+}
