@@ -30,6 +30,7 @@ $projs = User\projects($user_id)->data;
     <?php
     include "$root/components/head.php";
     include "$root/components/navbar.php";
+    include "$root/components/footer.php";
     ?>
     <title> Profilo di <?= $full_name ?> </title>
 </head>
@@ -87,5 +88,7 @@ $projs = User\projects($user_id)->data;
     <?php if ($is_self): ?>
     <script src="/static/js/profile.js" type="module"></script>
     <?php endif; ?>
+
+    <?php footer() ?>
 </body>
 </html>

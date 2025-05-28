@@ -23,6 +23,7 @@ $project = Project\get($project_id)
     <?php 
         include "$root/components/head.php";
         include "$root/components/navbar.php";
+        include "$root/components/footer.php";
     ?>
     <title> Dettagli Progetto </title>
 </head>
@@ -63,5 +64,7 @@ $project = Project\get($project_id)
     <?php if ($can_edit): ?>
     <script src="/static/js/project.js" type="module"></script>
     <?php endif; ?>
+
+    <?php footer() ?>
 </body>
 </html>

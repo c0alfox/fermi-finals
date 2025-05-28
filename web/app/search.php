@@ -6,6 +6,7 @@
     include "$root/components/head.php";
     include "$root/components/navbar.php";
     include "$root/components/search.php";
+    include "$root/components/footer.php";
     ?>
     <title> Pagina Principale </title>
 </head>
@@ -18,5 +19,7 @@
         search();
         # print search results here
     ?>
+
+    <?php footer() ?>
 </body>
 </html>

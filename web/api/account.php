@@ -111,7 +111,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'PUT') {
     }
 
     if (isset($data['bio'])) {
-        $resp = User\edit_bio($user_id, $data['bio'])
+        $resp = User\edit_bio($user_id, empty($data['bio']) ? null : $data['bio'])
             ->respond_if_error();
     }
 
