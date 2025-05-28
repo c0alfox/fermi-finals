@@ -77,7 +77,7 @@ $projs = User\projects($user_id)->data;
                         <?php endif; ?>
                     </div>
                     <div class="card-footer">
-                        <a href="/app/project/details.php?id=<?= $p['project_id'] ?>" class="btn btn-primary float-end">Vai</a>
+                        <a href="/app/project/details.php?id=<?= $p['project_id'] ?>" class="btn btn-outline btn-outline-primary float-end">Vai</a>
                     </div>
                 </div>
                 <?php endforeach; ?>

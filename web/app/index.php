@@ -18,7 +18,7 @@ $resp = Suggestions\featured();
     <title> Pagina Principale </title>
 </head>
 <body>
-    <?php navbar() ?>
+    <?php navbar(0) ?>
 
     <h1 class="text-center mt-2">Test&Tell</h1>
 

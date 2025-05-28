@@ -13,18 +13,22 @@ if ($user_id !== null): ?>
 <script type="module" src="/static/js/components/navbar.js" defer></script>
 <?php endif;
 
-function navbar() { 
+function navbar(int $active_child = -1) { 
     global $user_id, $userstring;
     ?>
-    <nav id="navbar_id" class="navbar navbar-expand-lg fixed-top bg-primary bg-gradient">
+    <nav id="navbar_id" class="navbar navbar-expand-lg fixed-top text-bg-primary bg-gradient">
         <div class="container">
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
             </button>
             <div class="collapse navbar-collapse" id="navbarNav">
                 <div class="navbar-nav me-auto">
-                    <a class="nav-link active" aria-current="page" href="/">Home</a>
-                    <!--<a class="nav-link" href="">Features</a>-->
+                    <a class="nav-link text-white <?=
+                        $active_child == 0 ? 'fw-bold' : ''
+                    ?>" aria-current="page" href="/">Home</a>
+                    <a class="nav-link text-white <?=
+                        $active_child == 1 ? 'fw-bold' : ''
+                    ?>" href="/app/search.php">Cerca</a>
                 </div>
 
                 <?php if ($userstring !== null):

@@ -8,9 +8,9 @@ require_once "search/header.php";
 
 require_once "$root/functions/suggestions.php";
 
-function search() { ?>
+function search(string $default_value="") { ?>
 <div class="d-flex position-relative search-container mx-auto" style="min-width: 280px; max-width: 720px; flex-grow: 1;">
-    <form class="input-group" action="/app/search.php">
+    <form class="input-group" method="GET" action="/app/search.php">
         <input 
             name="q"
             type="text" 
@@ -19,8 +19,9 @@ function search() { ?>
             placeholder="Cerca nel sito..." 
             aria-label="Cerca nel sito" 
             autocomplete="off"
+            value="<?= $default_value ?>"
         >
-        <button class="btn border-primary-subtle bg-primary-subtle border-start-0" type="button" id="searchButton">
+        <button class="btn border-primary-subtle bg-primary-subtle border-start-0" type="submit" id="searchButton">
             <i class="icon i-search"></i>
         </button>
     </form>

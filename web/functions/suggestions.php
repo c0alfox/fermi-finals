@@ -5,7 +5,7 @@ require_once 'functions_prelude.php';
 
 use \Response;
 
-function projects(string|null $query = null, int $limit = 3): Response {
+function projects(string|null $query = null, int $limit = 3, int $crop_limit = 90, bool $crop_first_line = true): Response {
     try {
         $pdo = connect();
 
@@ -36,7 +36,11 @@ function projects(string|null $query = null, int $limit = 3): Response {
     }
 
     foreach ($proj_data as &$proj) {
-        $proj['abstract'] = crop(first_line($proj['abstract']), 90);
+        $str = $crop_first_line
+            ? first_line($proj['abstract'])
+            : $proj['abstract'];
+
+        $proj['abstract'] = crop($str, $crop_limit);
     }
 
     return new Response(200, 'Risultati della ricerca', [
@@ -45,7 +49,7 @@ function projects(string|null $query = null, int $limit = 3): Response {
     ]);
 }
 
-function users(string|null $query = null, int $limit = 3): Response {
+function users(string|null $query = null, int $limit = 3, int $crop_limit = 90, bool $crop_first_line = true): Response {
     try {
         $pdo = connect();
 
@@ -73,7 +77,11 @@ function users(string|null $query = null, int $limit = 3): Response {
     }
 
     foreach ($data as &$user) {
-        $user['bio'] = crop(first_line($user['bio']), 90);
+        $str = $crop_first_line
+            ? first_line($user['bio'])
+            : $user['bio'];
+
+        $user['bio'] = crop($str, $crop_limit);
     }
 
     return new Response(200, 'Risultati della ricerca', [

@@ -42,7 +42,6 @@ footer {
     hyphens: auto;
 }
 
-
 .editable[contenteditable="true"] {
     outline: none;
     border-bottom: 1px dashed #ccc;
@@ -120,7 +119,6 @@ footer {
     width: 350px;
 }
 
-
 .notification-item {
     border-bottom: 1px solid rgba(0,0,0,.125);
 }
@@ -142,7 +140,7 @@ footer {
     cursor: pointer;
 }
 
-.search-item:hover {
+.search-item-do-highlight:hover {
     background-color: whitesmoke;
 }
 

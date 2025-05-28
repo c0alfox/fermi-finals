@@ -45,5 +45,6 @@ function first_line(string|null $str): string|null {
         return null;
     }
 
-    return preg_split('#\r?\n#', $str, 2)[0];
+    $out = preg_split('#\r?\n#', $str, 2)[0];
+    return strlen($out) == strlen($str) ? $str : "$out...";
 }

@@ -56,7 +56,7 @@ $project = Project\get($project_id)
                     <?php endif; ?>
                 </div>
                 <div class="card-footer">
-                    <a href="#" class="btn btn-primary float-end">Vai</a>
+                    <a href="#" class="btn btn-outline btn-outline-primary float-end">Vai</a>
                 </div>
             </div>
             <?php endforeach; ?>
