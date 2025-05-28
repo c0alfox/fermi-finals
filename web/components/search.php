@@ -25,7 +25,7 @@ function search() { ?>
         </button>
     </form>
     
-    <div id="searchSuggestions" class="d-none search-dropdown position-absolute top-100 start-0 mt-1 shadow-sm border border-primary-subtle rounded bg-white w-100">
+    <div id="searchSuggestions" class="z-1 d-none search-dropdown position-absolute top-100 start-0 mt-1 shadow-sm border border-primary-subtle rounded bg-white w-100">
         <div>
         <?php
             Search\header("Progetti", true);

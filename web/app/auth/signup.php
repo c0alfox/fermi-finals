@@ -33,12 +33,14 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $matching_passwords = $_POST['password'] == $_POST['password_confirm'];
     if (!$fulfills_requirements) goto output;
 
+    $_POST['bio'] = trim($_POST['bio']);
+
     $resp = User\create(
         $_POST['email'],
         $_POST['name'],
         $_POST['surname'],
         $_POST['password'],
-        $_POST['bio'] ?? null
+        empty($_POST['bio']) ? null : $_POST['bio']
     );
 
     if ($resp->is_ok()) {

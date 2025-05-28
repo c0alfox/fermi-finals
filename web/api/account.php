@@ -105,7 +105,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'PUT') {
         ->respond_if_error()
         ->data;
 
-    if (empty($data['password']) && empty($data['bio'])) {
+    if (empty($data['password']) && !isset($data['bio'])) {
         (new Response(422, 'Sono necessari campi da modificare'))
             ->api_response();
     }
