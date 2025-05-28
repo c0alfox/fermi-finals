@@ -48,7 +48,7 @@ $project = Project\get($project_id)
             </div>
             <div class="card-body">
                 <?php if ($r['motivations'] === null): ?>
-                    <p class="card-text italic"> La revisione del progetto non è stata motivata </p>
+                    <p class="card-text italic"> La revisione non presenta alcuna descrizione aggiuntiva </p>
                 <?php else: ?>
                     <p class="card-text"> <?= htmlspecialchars($r['motivations']) ?> </p>
                 <?php endif; ?>

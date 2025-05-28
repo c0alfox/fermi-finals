@@ -143,3 +143,19 @@
 #searchSuggestions.active {
     opacity: 1;
 }
+
+.jumbotron {
+    height: 35vh;
+}
+
+.jumbotron-lg {
+    height: 42vh;
+}
+
+.project-jumbotron {
+    display: grid;
+    grid-template-columns: 1fr;
+    grid-template-rows: 1fr 4fr;
+    grid-column-gap: 0px;
+    grid-row-gap: 0px;
+}

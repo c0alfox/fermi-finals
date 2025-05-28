@@ -82,13 +82,14 @@ function users(string|null $query = null, int $limit = 3): Response {
     ]);
 }
 
-function featured(int $limit = 3): Response {
+function featured(int $limit = 4, bool $crop = true, int $crop_limit = 200): Response {
     try {
         $pdo = connect();
-        $s = $pdo->prepare("SELECT title, abstract, project_datetime, name, surname
+        $s = $pdo->prepare("SELECT project_id, title, abstract, project_datetime, name, surname
             FROM PrgProjects
-            LIMIT :lim
-            ORDER BY project_datetime DESC");
+            INNER JOIN PrgUsers USING(user_id)
+            ORDER BY project_datetime DESC
+            LIMIT :lim");
         $s->bindParam('lim', $limit, \PDO::PARAM_INT);
         $s->execute();
         $pdo = null;
@@ -98,12 +99,15 @@ function featured(int $limit = 3): Response {
     } catch (\PDOException $e) {
         return new Response(500, 'Ricerca fallita', [
             'count' => 0,
-            'content' => []
+            'content' => [],
+            'e' => $e->getMessage()
         ]);
     }
 
-    foreach ($data as &$project) {
-        $project['abstract'] = crop(first_line($project['abstract']), 90);
+    if ($crop) {
+        foreach ($data as &$project) {
+            $project['abstract'] = crop(first_line($project['abstract']), $crop_limit);
+        }
     }
 
     return new Response(200, 'Risultati della ricerca', [
