@@ -27,43 +27,46 @@ $project = Project\get($project_id)
     ?>
     <title> Dettagli Progetto </title>
 </head>
-<body class="container">
+<body>
     <?php navbar() ?>
 
-    <h1 class="text-center mt-2"> <?= htmlspecialchars($project['project_data']['title']) ?> </h1>
+    <main class="container">
+        <h1 class="text-center mt-2"> <?= htmlspecialchars($project['project_data']['title']) ?> </h1>
 
-    <h2> Abstract </h2>
-    <?php if ($project['project_data']['abstract'] === null): ?>
-        <p class="italic mx-5" id="abs" data-empty> Il progetto non ha un abstract </p>
-    <?php else: ?>
-        <p class="mx-5" id="abs"> <?= htmlspecialchars($project['project_data']['abstract']) ?></p>
-    <?php endif; ?>
+        <h2> Abstract </h2>
+        <?php if ($project['project_data']['abstract'] === null): ?>
+            <p class="italic mx-5" id="abs" data-empty> Il progetto non ha un abstract </p>
+        <?php else: ?>
+            <p class="mx-5" id="abs"> <?= htmlspecialchars($project['project_data']['abstract']) ?></p>
+        <?php endif; ?>
 
-    <h2> Revisioni (<?= $project['project_data']['revision_count'] ?>) </h2>
-    <div class="mx-5">
-        <?php foreach ($project['revisions'] as $r): ?>
-        <div class="card mt-3">
-            <div class="card-header clearfix">
-                <h5 class="card-title m-0 float-start"> Revisione <?= $r['revision_number'] ?> </h5>
-                <p class="float-end m-0">Del <?= date('d/m/Y \a\l\l\e H:i:s', strtotime($r['revision_datetime']))?> </p>
+        <h2> Revisioni (<?= $project['project_data']['revision_count'] ?>) </h2>
+        <div class="mx-5">
+            <?php foreach ($project['revisions'] as $r): ?>
+            <div class="card mt-3">
+                <div class="card-header clearfix">
+                    <h5 class="card-title m-0 float-start"> Revisione <?= $r['revision_number'] ?> </h5>
+                    <p class="float-end m-0">Del <?= date('d/m/Y \a\l\l\e H:i:s', strtotime($r['revision_datetime']))?> </p>
+                </div>
+                <div class="card-body">
+                    <?php if ($r['motivations'] === null): ?>
+                        <p class="card-text italic"> La revisione non presenta alcuna descrizione aggiuntiva </p>
+                    <?php else: ?>
+                        <p class="card-text"> <?= htmlspecialchars($r['motivations']) ?> </p>
+                    <?php endif; ?>
+                </div>
+                <div class="card-footer">
+                    <a href="#" class="btn btn-primary float-end">Vai</a>
+                </div>
             </div>
-            <div class="card-body">
-                <?php if ($r['motivations'] === null): ?>
-                    <p class="card-text italic"> La revisione non presenta alcuna descrizione aggiuntiva </p>
-                <?php else: ?>
-                    <p class="card-text"> <?= htmlspecialchars($r['motivations']) ?> </p>
-                <?php endif; ?>
-            </div>
-            <div class="card-footer">
-                <a href="#" class="btn btn-primary float-end">Vai</a>
-            </div>
+            <?php endforeach; ?>
         </div>
-        <?php endforeach; ?>
-    </div>
 
-    <?php if ($can_edit): ?>
-    <script src="/static/js/project.js" type="module"></script>
-    <?php endif; ?>
+        <?php if ($can_edit): ?>
+        <script src="/static/js/project.js" type="module"></script>
+        <?php endif; ?>
+
+    </main>
 
     <?php footer() ?>
 </body>

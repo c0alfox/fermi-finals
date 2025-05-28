@@ -1,5 +1,8 @@
 <?php function footer() { ?>
-<footer class="text-bg-primary bg-gradient shadow-lg">
+<div class="footer-padding">
+
+</div>
+<footer class="text-bg-primary bg-gradient shadow-lg d-flex align-items-center justify-content-center">
     <div class="container py-4">
         <div class="row">
             <div class="col-4 d-flex align-items-center justify-content-center">
