@@ -4,7 +4,7 @@ mod api;
 mod structs;
 mod wss;
 
-use crate::{log, warn};
+use crate::*;
 
 use db::DBPoolRef;
 use warp::{Filter, Rejection, Reply};
@@ -25,13 +25,29 @@ pub fn api(
 }
 
 pub fn ws(
-    _db_pool: DBPoolRef,
+    db_pool: DBPoolRef,
+    clients: &'static Clients
 ) -> impl Filter<Extract = (impl Reply,), Error = Rejection> + Clone {
     let root = warp::path("ws");
 
-    let recv = root.and(warp::path("recv")).and_then(wss::recv);
+    let recv = root
+        .and(warp::path("recv"))
+        .and(warp::ws())
+        .and(warp::cookie::<String>("auth_token"))
+        .and(warp::path::end())
+        .and(with_clients(clients))
+        .and_then(wss::recv);
 
-    recv
+    let register = root
+        .and(warp::path("register"))
+        .and(warp::path::param::<i32>())
+        .and(warp::path::end())
+        .and(warp::post())
+        .and(warp::cookie::<String>("auth_token"))
+        .and(with_clients(clients))
+        .and_then(wss::register);
+
+    recv.or(register)
 }
 
 pub async fn recover(_r: Rejection) -> Result<impl Reply, std::convert::Infallible> {

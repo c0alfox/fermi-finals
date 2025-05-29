@@ -37,7 +37,7 @@ function navbar(int $active_child = -1) {
                 <div>
                     <div class="nav-item dropdown position-relative d-inline">
                         <a class="nav-link px-3 position-relative" href="#" id="notificationDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false" data-bs-auto-close="outside">
-                            <i class="icon notification-bell"></i>
+                            <i class="icon notification-bell invert"></i>
                             <span id="notification-badge" class="notification-badge badge rounded-pill bg-danger 
                                 <?= $count == 0 ? 'd-none' : '' ?>"> <?= $count ?> </span>
                         </a>

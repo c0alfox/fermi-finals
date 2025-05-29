@@ -14,3 +14,9 @@ pub fn with_dbpool(
 ) -> impl Filter<Extract = (DBPoolRef,), Error = std::convert::Infallible> + Clone {
     warp::any().map(move || db_pool)
 }
+
+pub fn with_clients(
+    clients: &'static Clients
+) -> impl Filter<Extract = (&'static Clients,), Error = std::convert::Infallible> + Clone {
+    warp::any().map(move || clients)
+}

@@ -6,10 +6,26 @@ use filters::*;
 use routes::db::*;
 use routes::api_response;
 use warp::Filter;
+use warp::ws::Message;
+use tokio::sync::mpsc;
+
+use std::sync::{Arc, Mutex};
+use std::collections::HashMap;
+
+#[derive(Debug, Clone)]
+struct Client {
+    pub uid: i32,
+    pub sender: Option<mpsc::UnboundedSender<std::result::Result<Message, warp::Error>>>
+}
+
+type Clients = Arc<Mutex<HashMap<String, Client>>>;
 
 #[tokio::main]
 async fn main() {
     info!("Application started");
+
+    let clients: Clients = Arc::new(Mutex::new(HashMap::new()));
+    let clients: &'static Clients = Box::leak(Box::new(clients));
 
     let db_pool = match connect().await {
         Ok(v) => {
@@ -24,7 +40,7 @@ async fn main() {
     let db_pool: DBPoolRef = Box::leak(Box::new(db_pool));
 
     let preprocess = filters::log_request();
-    let routes = routes::api(&db_pool).or(routes::ws(&db_pool));
+    let routes = routes::api(&db_pool).or(routes::ws(&db_pool, clients));
     info!("Routes registered");
 
     let server = preprocess
