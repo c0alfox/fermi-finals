@@ -1,5 +1,9 @@
 import api_fetch from "../lib/fetch.js";
 
+/****************************
+ *    Fetching from DOM     *
+ ****************************/
+
 /**
  * @type { Array<HTMLElement> }
  */
@@ -8,6 +12,19 @@ const badge = document.getElementById('notification-badge');
 let badgeValue = Number(badge.innerText);
 
 const attrName = "data-id";
+
+/****************************
+ *    WebSocket Connection  *
+ ****************************/
+
+let id_resp = await api_fetch('GET', 'user/get_id');
+let user_id = id_resp.data.user_id;
+
+// TODO: Implement WebSocket notification handling here
+
+/****************************
+ *     Helper Functions     *
+ ****************************/
 
 const updateBadge = (newVal) => {
     badgeValue = newVal;
@@ -23,6 +40,10 @@ const deletion = (parent) => {
     updateBadge(badgeValue - 1);
     parent.remove();
 }
+
+/****************************
+ *    Loading Listeners     *
+ ****************************/
 
 /**
  * @param { MouseEvent } e 

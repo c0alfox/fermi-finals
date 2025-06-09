@@ -14,11 +14,13 @@ use std::collections::HashMap;
 
 #[derive(Debug, Clone)]
 struct Client {
-    pub uid: i32,
+    pub jwt: String,
     pub sender: Option<mpsc::UnboundedSender<std::result::Result<Message, warp::Error>>>
 }
 
-type Clients = Arc<Mutex<HashMap<String, Client>>>;
+type ClientSessions = Vec<Client>;
+
+type Clients = Arc<Mutex<HashMap<i32, ClientSessions>>>;
 
 #[tokio::main]
 async fn main() {

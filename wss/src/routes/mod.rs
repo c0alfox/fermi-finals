@@ -34,20 +34,12 @@ pub fn ws(
         .and(warp::path("recv"))
         .and(warp::ws())
         .and(warp::cookie::<String>("auth_token"))
+        .and(warp::path::param::<i32>())
         .and(warp::path::end())
         .and(with_clients(clients))
         .and_then(wss::recv);
 
-    let register = root
-        .and(warp::path("register"))
-        .and(warp::path::param::<i32>())
-        .and(warp::path::end())
-        .and(warp::post())
-        .and(warp::cookie::<String>("auth_token"))
-        .and(with_clients(clients))
-        .and_then(wss::register);
-
-    recv.or(register)
+    recv
 }
 
 pub async fn recover(_r: Rejection) -> Result<impl Reply, std::convert::Infallible> {

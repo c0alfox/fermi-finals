@@ -1,10 +1,7 @@
 use crate::*;
 
-use warp::filters::ws::{WebSocket, Ws};
-use futures::StreamExt;
-use tokio::sync::mpsc;
-use tokio_stream::wrappers::UnboundedReceiverStream;
-use futures::FutureExt;
+use warp::filters::ws::Ws;
+use futures::{SinkExt, StreamExt};
 
 pub async fn register(
     uid: i32,
@@ -12,7 +9,7 @@ pub async fn register(
     clients: &'static Clients
 ) -> Result<impl warp::Reply, warp::Rejection> {
     info!("Registering client with uid {}", uid);
-    clients.lock().unwrap().insert(jwt, Client { uid, sender: None });
+    // 
     info!("User registered successfully");
     info!("All clients are {:?}", clients);
 
@@ -22,52 +19,28 @@ pub async fn register(
 pub async fn recv(
     ws: Ws,
     jwt: String,
+    uid: i32,
     clients: &'static Clients
 ) -> Result<impl warp::Reply, warp::Rejection> {
     info!("Recieve notification endpoint reached");
 
-    let locked = clients.lock().unwrap();
-    let client = locked.get(&jwt).cloned();
-    match client {
-        Some(c) => Ok(ws.on_upgrade(
-            move |socket| client_connection(socket, jwt, clients, c)
-        )),
-        None => Err(warp::reject::not_found()),
-    }
+    Ok(ws.on_upgrade( move |socket| {
+        info!("Upgrading");
+        client_connection(socket)
+        // , uid, jwt, clients
+    }))
 }
 
-pub async fn client_connection(
-    ws: WebSocket,
-    jwt: String,
-    clients: &'static Clients,
-    mut client: Client
-) {
-    let (client_ws_sender, mut client_ws_rcv) = ws.split();
-    let (client_sender, client_rcv) = mpsc::unbounded_channel();
+pub async fn client_connection(socket: warp::ws::WebSocket) {
+    let (mut send, mut recv) = socket.split();
 
-    let client_rcv = UnboundedReceiverStream::new(client_rcv);
-    tokio::task::spawn(client_rcv.forward(client_ws_sender).map(|result| {
-        if let Err(e) = result {
-            eprintln!("error sending websocket msg: {}", e);
+    while let Some(body) = recv.next().await {
+        if let Ok(content) = body {
+            info!("Got: {:?}", content);
         }
-    }));
 
-    client.sender = Some(client_sender);
-    clients.lock().unwrap().insert(jwt.clone(), client.clone());
-
-    println!("{:?} connected", client);
-
-    while let Some(result) = client_ws_rcv.next().await {
-        let msg = match result {
-            Ok(msg) => msg,
-            Err(e) => {
-                error!("error receiving ws message for id: {:?}): {}", client, e);
-                break;
-            }
-        };
-        info!("Received {}", msg.to_str().unwrap());
+        send.send(Message::text("somebody once told me")).await.unwrap();
     }
 
-    clients.lock().unwrap().remove(&jwt);
-    println!("{:?} disconnected", client);
+    println!("client disconnected");
 }
