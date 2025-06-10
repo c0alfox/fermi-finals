@@ -25,13 +25,13 @@ let user_id = id_resp.data.user_id;
 
 let ws = new WebSocket(`/ws/notifs/${user_id}/`);
 
-// Send a message every 20 seconds to keep the websocket connection alive
-const keepAliveInterval = 20_000;
-let i = 1;
-setInterval(() => {
-    ws.send(`User #${user_id} Keep Alive #${i}`);
-    i++;
-}, keepAliveInterval);
+ws.onopen = () => {
+    window.console.log("Notification connection established");
+}
+
+ws.onclose = () => {
+    window.console.log("Notification connection terminated");
+}
 
 /**
  * @param {MessageEvent} m 
