@@ -48,3 +48,7 @@ function first_line(string|null $str): string|null {
     $out = preg_split('#\r?\n#', $str, 2)[0];
     return strlen($out) == strlen($str) ? $str : "$out...";
 }
+
+function datetime_to_rust(string $target) {
+    return str_replace(' ', 'T', $target);
+}

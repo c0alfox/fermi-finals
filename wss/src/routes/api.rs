@@ -1,11 +1,11 @@
 use crate::*;
-use crate::types::{Notification, PartialNotification};
-use crate::filters::{with_dbpool};
+use crate::types::Notification;
+use crate::filters::with_clients;
 
-use warp::{http::StatusCode, Filter, Rejection, Reply};
+use warp::{http::StatusCode, ws::Message, Filter, Rejection, Reply};
 
 pub fn root(
-    db_pool: &'static DBPool,
+    clients: &'static Clients
 ) -> impl Filter<Extract = (impl Reply,), Error = Rejection> + Clone {
     let root = warp::path("api");
 
@@ -14,11 +14,67 @@ pub fn root(
         .and(warp::path::end())
         .and_then(health);
 
-    let notifs = root.and(notifs(db_pool));
+    let notifs = root.and(notifs(clients));
 
     health.or(notifs)
 }
 
+fn notifs(
+    clients: &'static Clients
+) -> impl Filter<Extract = (impl Reply,), Error = Rejection> + Clone {
+    let root = warp::path("notifs");
+
+    root
+        .and(with_clients(clients))
+        .and(warp::post())
+        .and(warp::body::json())
+        .and_then(send)
+        .recover(async |rej: Rejection| {
+            if let Some(_) = rej.find::<warp::reject::MethodNotAllowed>() {
+                return Ok(StatusCode::METHOD_NOT_ALLOWED);
+            }
+
+            if let Some(e) = rej.find::<warp::body::BodyDeserializeError>() {
+                error!("Body Deserialize on {:?}", e);
+                return Ok(StatusCode::BAD_REQUEST);
+            }
+
+            Err(warp::reject())
+        })
+}
+
+pub async fn health() -> Result<impl warp::Reply, warp::Rejection> {
+    info!("Received health ping");
+    Ok(StatusCode::OK)
+}
+
+pub async fn send(
+    clients: &'static Clients,
+    body: Notification
+) -> Result<impl warp::Reply, warp::Rejection> {
+    info!("Send notification endpoint reached, received {:?}", body);
+
+    // Get user sessions
+    let user = body.user_id;
+    let locked = clients.lock().unwrap();
+    let sessions = locked.get(&user);
+
+    if let Some(vec) = sessions {
+        // Get json string from notification body
+        let content = serde_json::to_string(&body).unwrap();
+        let content = content.as_str();
+
+        // Send to all open sessions
+        vec.iter().for_each(|val| {
+            let _ = val.sender.send(Ok(Message::text(content)));
+        });
+    }
+
+    Ok("")
+}
+
+
+/*
 pub fn notifs(
     db_pool: &'static DBPool,
 ) -> impl Filter<Extract = (impl Reply,), Error = Rejection> + Clone {
@@ -52,16 +108,22 @@ pub fn notifs(
     send.or(show)
 }
 
-pub async fn health() -> Result<impl warp::Reply, warp::Rejection> {
-    info!("Received health ping");
-    Ok(StatusCode::OK)
-}
-
 pub async fn send(
     db_pool: &'static DBPool,
     body: PartialNotification
 ) -> Result<impl warp::Reply, warp::Rejection> {
     info!("Send notification endpoint reached, received {:?}", body);
+
+    let mut transaction = match db_pool.begin().await {
+        Ok(v) => v,
+        Err(e) => { 
+            warn!("Failed to execute query, error {:?}", e);
+            return api_response!(
+                StatusCode::INTERNAL_SERVER_ERROR, "Errore nell'inserimento";
+                warp::reject()
+            )
+        },
+    };
 
     let res =
         sqlx::query("INSERT INTO PrgNotifications (title, description, action_link, user_id) VALUES (?, ?, ?, ?)")
@@ -69,16 +131,19 @@ pub async fn send(
         .bind(body.description)
         .bind(body.action_link)
         .bind(body.user_id)
-        .execute(db_pool)
+        .execute(&mut *transaction)
         .await;
 
     if let Err(e) = res {
         warn!("Failed to execute query, error {:?}", e);
+        let _ = transaction.rollback().await;
         return api_response!(
             StatusCode::INTERNAL_SERVER_ERROR, "Errore nell'inserimento";
             warp::reject()
         )
     }
+
+    let _ = transaction.commit().await;
 
     api_response!(
         StatusCode::OK, "Notifica aggiunta con successo";
@@ -113,4 +178,4 @@ pub async fn show(
         StatusCode::OK, "Risultati della ricerca", serde_json::json!(res);
         warp::reject()
     )
-}
+}*/

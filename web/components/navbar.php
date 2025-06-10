@@ -51,9 +51,11 @@ function navbar(int $active_child = -1) {
                                         ?>
                                     </h6>
                                 </div>
-                                <?php foreach ($notifs as $n) {
-                                    notification($n);
-                                } ?>
+                                <div id="notification-container">
+                                    <?php foreach ($notifs as $n) {
+                                        notification($n);
+                                    } ?>
+                                </div>
                             </div>
                         </div>
                     </div>

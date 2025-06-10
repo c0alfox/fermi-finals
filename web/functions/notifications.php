@@ -13,7 +13,8 @@ function fetch($user_id, $suppose_user_exists = true): Response {
         $pdo = connect();
         $s = $pdo->prepare("SELECT *
             FROM PrgNotifications
-            WHERE user_id = :id");
+            WHERE user_id = :id
+            ORDER BY notification_datetime DESC");
         $s->execute(['id' => $user_id]);
         $data = $s->fetchAll(PDO::FETCH_ASSOC);
         $pdo = null;
@@ -136,4 +137,34 @@ function delete($notif_id, $suppose_notif_exists = true): Response {
         200,
         'Notifica eliminata con successo',
     );
+}
+
+function create(string $title, string|null $desc, string|null $link, int $id) {
+    try {
+        $pdo = connect();
+        $pdo->beginTransaction();
+
+        $sql = "INSERT INTO PrgNotifications (title, description, action_link, user_id) 
+            VALUES (:title, :description, :link, :id)";
+        $s = $pdo->prepare($sql);
+        $s->execute([
+            'title' => $title,
+            'description' => $desc,
+            'link' => $link,
+            'id' => $id,
+        ]);
+
+        $lastNotifId = $pdo->lastInsertId();
+        $sql = "SELECT * FROM PrgNotifications WHERE notification_id = :id";
+        $s = $pdo->prepare($sql);
+        $s->execute(['id' => $lastNotifId]);
+        $notif = $s->fetch(PDO::FETCH_ASSOC);
+
+        $pdo->commit();
+    } catch (\PDOException $e) {
+        $pdo->rollBack();
+        return new Response(500, 'Notifica non creata');
+    }
+
+    return new Response(201, 'Notifica creata con successo', $notif);
 }

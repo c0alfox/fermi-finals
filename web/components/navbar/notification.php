@@ -13,7 +13,7 @@ function notification($notif) { ?>
     </p>
     <div class="d-flex align-items-center justify-content-between mt-2">
         <p class="small text-muted mb-0">
-            <?= date('d/m/Y h:i', strtotime($notif['notification_datetime'])) ?>
+            <?= date('d/m/Y H:i', strtotime($notif['notification_datetime'])) ?>
         </p>
         <?php if (!empty($notif['action_link'])): ?>
             <a href="<?= htmlspecialchars($notif['action_link']) ?>" class="btn btn-sm btn-primary">

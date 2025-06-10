@@ -13,8 +13,8 @@ pub fn root(
 ) -> impl Filter<Extract = (impl Reply,), Error = Rejection> + Clone {
     let root = warp::path("ws");
 
-    let recv = root
-        .and(warp::path("recv"))
+    let notifs = root
+        .and(warp::path("notifs"))
         .and(warp::ws())
         .and(warp::cookie::<String>("auth_token"))
         .and(warp::path::param::<i32>())
@@ -22,7 +22,7 @@ pub fn root(
         .and(with_clients(clients))
         .and_then(recv);
 
-    recv
+    notifs
 }
 
 async fn recv(
@@ -90,6 +90,9 @@ fn destroy_client(uid: i32, jwt: String, clients: &'static Clients) {
 
     if let Some(v) = user_opt {
         v.retain(|session| session.jwt != jwt);
+        if v.len() == 0 {
+            locked.remove(&uid);
+        }
     } else {
         error!("Destroyed client doesn't have related user sessions");
     }

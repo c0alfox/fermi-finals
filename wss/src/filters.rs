@@ -9,12 +9,6 @@ pub fn log_request() -> impl Filter<Extract = (), Error = std::convert::Infallib
         .untuple_one()
 }
 
-pub fn with_dbpool(
-    db_pool: &'static DBPool,
-) -> impl Filter<Extract = (&'static DBPool,), Error = std::convert::Infallible> + Clone {
-    warp::any().map(move || db_pool)
-}
-
 pub fn with_clients(
     clients: &'static Clients
 ) -> impl Filter<Extract = (&'static Clients,), Error = std::convert::Infallible> + Clone {

@@ -8,11 +8,10 @@ use std::convert::Infallible;
 use warp::{Filter, Reply, Rejection};
 
 pub fn routes(
-    db_pool: &'static DBPool,
     clients: &'static Clients
 ) -> impl Filter<Extract = (impl Reply,), Error = Infallible> + Clone {
     let preprocess = log_request();
-    let routes = api::root(db_pool)
+    let routes = api::root(clients)
         .or(wss::root(clients));
     info!("Routes registered");
 
