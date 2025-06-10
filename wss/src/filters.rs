@@ -10,8 +10,8 @@ pub fn log_request() -> impl Filter<Extract = (), Error = std::convert::Infallib
 }
 
 pub fn with_dbpool(
-    db_pool: DBPoolRef,
-) -> impl Filter<Extract = (DBPoolRef,), Error = std::convert::Infallible> + Clone {
+    db_pool: &'static DBPool,
+) -> impl Filter<Extract = (&'static DBPool,), Error = std::convert::Infallible> + Clone {
     warp::any().map(move || db_pool)
 }
 

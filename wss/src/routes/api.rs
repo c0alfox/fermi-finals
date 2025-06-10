@@ -1,10 +1,26 @@
-use super::structs::{Notification, PartialNotification};
 use crate::*;
+use crate::types::{Notification, PartialNotification};
+use crate::filters::{with_dbpool};
 
 use warp::{http::StatusCode, Filter, Rejection, Reply};
 
+pub fn root(
+    db_pool: &'static DBPool,
+) -> impl Filter<Extract = (impl Reply,), Error = Rejection> + Clone {
+    let root = warp::path("api");
+
+    let health = root
+        .and(warp::path("health"))
+        .and(warp::path::end())
+        .and_then(health);
+
+    let notifs = root.and(notifs(db_pool));
+
+    health.or(notifs)
+}
+
 pub fn notifs(
-    db_pool: DBPoolRef,
+    db_pool: &'static DBPool,
 ) -> impl Filter<Extract = (impl Reply,), Error = Rejection> + Clone {
     let root = warp::path("notifs");
 
@@ -42,7 +58,7 @@ pub async fn health() -> Result<impl warp::Reply, warp::Rejection> {
 }
 
 pub async fn send(
-    db_pool: DBPoolRef,
+    db_pool: &'static DBPool,
     body: PartialNotification
 ) -> Result<impl warp::Reply, warp::Rejection> {
     info!("Send notification endpoint reached, received {:?}", body);
@@ -71,7 +87,7 @@ pub async fn send(
 }
 
 pub async fn show(
-    db_pool: DBPoolRef,
+    db_pool: &'static DBPool,
     id: u32
 ) -> Result<impl warp::Reply, warp::Rejection> {
     info!("Show notification endpoint reached, received id {:?}", id);
