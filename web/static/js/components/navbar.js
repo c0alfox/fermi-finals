@@ -20,6 +20,20 @@ const attrName = "data-id";
 let id_resp = await api_fetch('GET', 'user/get_id');
 let user_id = id_resp.data.user_id;
 
+let ws = new WebSocket(`/ws/recv/${user_id}/`);
+
+// Send a message every 20 seconds to keep the websocket connection alive
+const keepAliveInterval = 20_000;
+let i = 1;
+setInterval(() => {
+    ws.send(`User #${user_id} Keep Alive #${i}`);
+    i++;
+}, keepAliveInterval);
+
+ws.onmessage = m => {
+    window.console.log(m);
+}
+
 // TODO: Implement WebSocket notification handling here
 
 /****************************
